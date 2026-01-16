@@ -1,0 +1,72 @@
+/* --- THE SPECTRE THEME --- */
+:root {
+    --bg-dark: #050505;       /* Deepest Black */
+    --bg-panel: #0f1218;      /* Panel Background */
+    --neon-cyan: #00f0ff;     /* Primary Glow */
+    --neon-purple: #bc13fe;   /* Secondary Glow */
+    --glass: rgba(22, 27, 34, 0.6); /* See-through effect */
+    --text-main: #edf2f7;
+    --text-muted: #8b949e;
+}
+
+body {
+    background-color: var(--bg-dark);
+    /* Subtle grid background for tech vibe */
+    background-image: radial-gradient(#1f293a 1px, transparent 1px);
+    background-size: 40px 40px; 
+    color: var(--text-main);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: transform 0.3s ease;
+}
+
+.glass-card:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+}
+
+/* Sidebar Styling */
+.sidebar {
+    height: 100vh;
+    width: 260px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(13, 17, 23, 0.95);
+    border-right: 1px solid #30363d;
+    padding-top: 20px;
+    z-index: 1000;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    padding: 15px 25px;
+    margin: 5px 15px;
+    border-radius: 10px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link i { width: 25px; margin-right: 10px; }
+
+.nav-link:hover, .nav-link.active {
+    color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.08);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.05);
+}
+
+/* Utilities */
+.text-neon { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+.content-wrapper { margin-left: 260px; padding: 30px; }
+.stat-number { font-size: 2.5rem; font-weight: bold; color: white; }

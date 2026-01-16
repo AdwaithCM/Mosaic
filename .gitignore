@@ -1,0 +1,13 @@
+venv/
+mosaic*.csv
+correlated*.csv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.env
+.vscode/
+.idea/
+.DS_Store
