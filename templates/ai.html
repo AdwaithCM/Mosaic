@@ -1,67 +1,135 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12 mb-4">
+<div class="row mb-4">
+    <div class="col-12">
         <div class="glass-card d-flex justify-content-between align-items-center">
             <div>
-                <h4 class="text-white mb-0"><i class="fas fa-brain text-neon me-2"></i>Mosaic Neural Engine</h4>
-                <small class="text-muted">Model: LSTM-v4 (Spectre) | Status: <span class="text-success">Inference Running</span></small>
+                <h4 class="text-white mb-0"><i class="fas fa-brain text-neon me-2"></i>SPECTRE Neural Engine</h4>
+                <small class="text-white-50">Model: Llama 3 (Groq) | Status: <span class="text-success">●
+                        Online</span></small>
             </div>
-            <button class="btn btn-outline-info btn-sm rounded-pill px-4">Retrain Model</button>
-        </div>
-    </div>
+            <button id="syncBtn" class="btn btn-outline-info btn-sm rounded-pill px-4 mx-3" onclick="runAI()">
+                <i class="fas fa-sync-alt me-2"></i> Run Live Analysis
 
-    <div class="col-md-8">
-        <div class="glass-card h-100">
-            <h5 class="mb-4 text-neon">Traffic Forecast (Next 3 Hours)</h5>
-            
-            <table class="table table-dark table-borderless table-hover" style="background: transparent;">
-                <thead>
-                    <tr class="text-muted border-bottom border-secondary">
-                        <th>Time Window</th>
-                        <th>Predicted Visitors</th>
-                        <th>Confidence Score</th>
-                        <th>Trend</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in predictions %}
-                    <tr>
-                        <td>{{ item.time }}</td>
-                        <td class="fw-bold text-white">{{ item.count }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">{{ item.confidence }}</span>
-                                <div class="progress" style="height: 4px; width: 60px; background: rgba(255,255,255,0.1);">
-                                    <div class="progress-bar bg-success" style="width: {{ item.confidence }};"></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="text-{{ item.trend_color }}"><i class="fas fa-{{ item.trend_icon }}"></i></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="glass-card mb-4">
-            <h6 class="text-muted text-uppercase">Model Accuracy</h6>
-            <h1 class="text-white" style="font-size: 3.5rem;">94.2<span class="text-muted fs-6">%</span></h1>
-            <p class="text-success mb-0"><i class="fas fa-check-circle me-1"></i> Validated on Test Set</p>
-        </div>
-
-        <div class="glass-card">
-            <h6 class="text-muted text-uppercase mb-3">Anomaly Detection</h6>
-            <div class="alert alert-warning border-0" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">
-                <i class="fas fa-exclamation-triangle me-2"></i> Unusual dwell time detected in <strong>Zone C</strong> at 10:15 AM.
+            </button>
+            <div class="text-end">
+                <button id="run-ai-btn" class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-sync-alt me-1"></i> Recalibrate Now
+                </button>
             </div>
-            <div class="alert alert-success border-0" style="background: rgba(25, 135, 84, 0.1); color: #198754;">
-                <i class="fas fa-shield-alt me-2"></i> No security threats detected.
+
+            <div class="text-end">
+                <small class="text-white-50 d-block">Last Analysis</small>
+                <span class="text-neon">{{ strategies[0].timestamp[11:16] if strategies else 'N/A' }}</span>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row">
+    {% if not strategies %}
+    <div class="col-12">
+        <div class="alert alert-danger">System Offline. Run Intelligence Engine.</div>
+    </div>
+    {% else %}
+
+    <div class="col-12">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
+            {% for strat in strategies %}
+            <div class="glass-card h-100 position-relative"
+                style="border-top: 4px solid {% if strat.ai_analysis.priority == 'High' %}#ff4d4d{% elif strat.ai_analysis.priority == 'Medium' %}#ffcc00{% else %}#00ff9d{% endif %};">
+
+                <span class="position-absolute top-0 end-0 badge rounded-pill m-3"
+                    style="background: {% if strat.ai_analysis.priority == 'High' %}rgba(255, 77, 77, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d{% elif strat.ai_analysis.priority == 'Medium' %}rgba(255, 204, 0, 0.2); color: #ffcc00; border: 1px solid #ffcc00{% else %}rgba(0, 255, 157, 0.2); color: #00ff9d; border: 1px solid #00ff9d{% endif %};">
+                    {{ strat.ai_analysis.priority }}
+                </span>
+
+                <h5 class="text-white mb-1">{{ strat.zone }}</h5>
+                <span class="badge bg-secondary mb-3">{{ strat.ai_analysis.category }}</span>
+
+                <div class="mb-3">
+                    <h6 class="text-white-50 small"><i class="fas fa-search text-info me-1"></i> Insight</h6>
+                    <p class="text-light small">{{ strat.ai_analysis.diagnosis }}</p>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-white-50 small"><i class="fas fa-bolt text-warning me-1"></i> Action</h6>
+                    <p class="text-white small fw-bold">{{ strat.ai_analysis.action_plan }}</p>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-info w-100 mt-auto" data-bs-toggle="modal"
+                    data-bs-target="#modal-{{ loop.index }}">
+                    <i class="fas fa-file-alt me-2"></i> View Detailed Report
+                </button>
+
+            </div>
+
+            <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="background: #1a1a2e; border: 1px solid #00f2ff; color: white;">
+                        <div class="modal-header border-secondary">
+                            <h5 class="modal-title text-neon">{{ strat.zone }} Strategic Report</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6 class="text-muted text-uppercase small">Current Metrics</h6>
+                            <div class="d-flex gap-3 mb-3">
+                                <span class="badge bg-dark border border-secondary">Visitors: {{
+                                    strat.metrics_snapshot.visitors }}</span>
+                                <span class="badge bg-dark border border-secondary">Conv: {{
+                                    strat.metrics_snapshot.conversion }}%</span>
+                            </div>
+
+                            <h6 class="text-muted text-uppercase small">AI Analysis</h6>
+                            <p class="small" style="line-height: 1.8;">
+                                {{ strat.ai_analysis.detailed_report }}
+                            </p>
+
+                            <div class="alert alert-success d-flex align-items-center mt-3"
+                                style="background: rgba(25, 135, 84, 0.2); border: 1px solid #198754; color: #75b798;">
+                                <i class="fas fa-rocket me-2"></i>
+                                <div>
+                                    <strong>Projected Outcome:</strong> {{ strat.ai_analysis.expected_outcome }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+<script>
+    function runAI() {
+        const btn = document.getElementById('syncBtn');
+        const originalText = btn.innerHTML;
+
+        // 1. Change button to loading state
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Analyzing...';
+        btn.disabled = true;
+
+        // 2. Call Python Route
+        fetch('/run_intelligence', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 3. If success, reload page to see new data
+                    location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Server Connection Failed");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+</script>
 {% endblock %}

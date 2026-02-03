@@ -11,3 +11,9 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+*.pkl
+check_models.py
+available_models.txt
+models_list.txt
+strategy_*.json
+atc-20121114.csv
