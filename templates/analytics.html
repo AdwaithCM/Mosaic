@@ -1,8 +1,153 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="glass-card text-center" style="margin-top: 100px;">
-    <i class="fas fa-hammer fa-3x text-muted mb-3"></i>
-    <h2 class="text-neon">System Module Offline</h2>
-    <p class="text-white">This interface is currently under construction.</p>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="text-white mb-0"><i class="fas fa-chart-pie text-neon me-2"></i>Performance Analytics</h4>
+                <small class="text-white-50">Historical Analysis & Impact Assessment</small>
+            </div>
+            <button class="btn btn-sm btn-outline-light"><i class="fas fa-download me-2"></i>Export Report</button>
+        </div>
+    </div>
 </div>
+
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="glass-card h-100">
+            <h5 class="text-white mb-4">Weekly Revenue Trend (AI Impact)</h5>
+            <div style="height: 300px;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="glass-card h-100">
+            <h5 class="text-white mb-4">Conversion by Zone</h5>
+            <div style="height: 300px;">
+                <canvas id="zoneChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="glass-card">
+            <h5 class="text-white mb-3">Raw Performance Metrics</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0" style="background: transparent;">
+                    <thead>
+                        <tr class="text-white-50 small text-uppercase">
+                            <th>Zone Name</th>
+                            <th>Visitors</th>
+                            <th>Dwell Time</th>
+                            <th>Conversion</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in analytics_data %}
+                        <tr>
+                            <td class="text-neon fw-bold">{{ row.Zone_Name }}</td>
+                            <td>{{ row.Visitors }}</td>
+                            <td>{{ row.Avg_Dwell_Time }}s</td>
+                            <td>{{ row.Conversion_Rate }}%</td>
+                            <td class="text-success">${{ row.Revenue }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // --- 1. CONFIGURING THE REVENUE LINE CHART ---
+    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+
+    // Create a "Glow" effect for the line
+    let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(0, 242, 255, 0.5)'); // Neon Blue
+    gradient.addColorStop(1, 'rgba(0, 242, 255, 0.0)');
+
+    new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+            labels: {{ dates | safe }}, // Passed from Python
+        datasets: [{
+            label: 'Revenue ($)',
+            data: {{ revenues | safe }}, // Passed from Python
+        borderColor: '#00f2ff', // Neon Blue Line
+        backgroundColor: gradient,
+        borderWidth: 3,
+        pointBackgroundColor: '#fff',
+        pointRadius: 5,
+        fill: true,
+        tension: 0.4 // Makes the line curved and smooth
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#ccc' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#ccc' }
+            }
+        }
+    }
+    });
+
+    // --- 2. CONFIGURING THE ZONE BAR CHART ---
+    const ctxZone = document.getElementById('zoneChart').getContext('2d');
+
+    new Chart(ctxZone, {
+        type: 'bar',
+        data: {
+            labels: {{ zone_names | safe }},
+        datasets: [{
+            label: 'Conversion Rate (%)',
+            data: {{ conversions | safe }},
+        backgroundColor: [
+            'rgba(255, 77, 77, 0.7)',  // Red
+            'rgba(0, 255, 157, 0.7)',  // Green
+            'rgba(255, 204, 0, 0.7)',  // Yellow
+            'rgba(0, 242, 255, 0.7)'   // Blue
+        ],
+        borderColor: 'rgba(255,255,255,0.5)',
+        borderWidth: 1
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: '#ccc' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#ccc' }
+            }
+        }
+    }
+    });
+</script>
 {% endblock %}
