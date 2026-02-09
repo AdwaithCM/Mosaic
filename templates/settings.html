@@ -1,8 +1,110 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="glass-card text-center" style="margin-top: 100px;">
-    <i class="fas fa-hammer fa-3x text-muted mb-3"></i>
-    <h2 class="text-neon">System Module Offline</h2>
-    <p class="text-white">This interface is currently under construction.</p>
+<div class="row">
+    <!-- Left Col: General Settings -->
+    <div class="col-md-8">
+        <!-- Appearance -->
+        <div class="glass-card mb-4">
+            <h5 class="text-neon mb-3"><i class="fas fa-paint-brush me-2"></i>Appearance</h5>
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-white">Interface Theme</span>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="theme" id="themeDark" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="themeDark"><i
+                            class="fas fa-moon me-2"></i>Dark</label>
+
+                    <input type="radio" class="btn-check" name="theme" id="themeLight" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="themeLight"><i
+                            class="fas fa-sun me-2"></i>Light</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data & Analytics -->
+        <div class="glass-card mb-4">
+            <h5 class="text-neon mb-3"><i class="fas fa-chart-bar me-2"></i>Data & Analytics</h5>
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="insightsToggle" checked>
+                <label class="form-check-label text-white" for="insightsToggle">Enable AI Insights</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="kpiToggle" checked>
+                <label class="form-check-label text-white" for="kpiToggle">Show Real-time KPIs</label>
+            </div>
+        </div>
+
+        <!-- Future Controls -->
+        <div class="glass-card mb-4 opacity-50">
+            <h5 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>Account (Disabled)</h5>
+            <input type="text" class="form-control bg-dark text-muted border-secondary mb-2" value="Spectre Admin"
+                disabled>
+            <button class="btn btn-outline-secondary w-100" disabled>Manage Security Keys</button>
+        </div>
+
+        <div class="glass-card mb-4 opacity-50">
+            <h5 class="text-muted mb-3"><i class="fas fa-shield-alt me-2"></i>System Security</h5>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" disabled>
+                <label class="form-check-label text-muted">Two-Factor Authentication</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Col: Info & Support -->
+    <div class="col-md-4">
+        <!-- App Info -->
+        <div class="glass-card mb-4 text-center">
+            <i class="fas fa-cube fa-3x text-neon mb-3"></i>
+            <h4 class="text-white">MOSAIC</h4>
+            <div class="badge bg-secondary mb-2">Spectre Protocol v1.0.2</div>
+            <hr class="border-secondary">
+            <p class="text-white-50 small">Advanced Retail Intelligence System. Optimized for high-throughput
+                environments.</p>
+        </div>
+
+        <!-- Support -->
+        <div class="glass-card" style="border: 1px solid #ffcc00;">
+            <h5 class="text-warning mb-3"><i class="fas fa-headset me-2"></i>Support</h5>
+            <p class="text-white small mb-3">Encountering critical system failures? Raise a ticket immediately.</p>
+            <a href="mailto:mosaicintl@gmail.com?subject=Mosaic Support Request"
+                class="btn btn-warning w-100 text-dark fw-bold">
+                <i class="fas fa-envelope me-2"></i>Register Complaint
+            </a>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Sync Radio Buttons with Current Theme
+        const darkRadio = document.getElementById('themeDark');
+        const lightRadio = document.getElementById('themeLight');
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+
+        if (currentTheme === 'light') {
+            lightRadio.checked = true;
+        } else {
+            darkRadio.checked = true;
+        }
+
+        // Listeners for manual override from Settings
+        darkRadio.addEventListener('change', () => {
+            if (darkRadio.checked) switchTheme('dark');
+        });
+
+        lightRadio.addEventListener('change', () => {
+            if (lightRadio.checked) switchTheme('light');
+        });
+
+        function switchTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            // Call the global function from base.html to update the header icon
+            if (typeof updateIcon === "function") {
+                updateIcon(theme);
+            }
+        }
+    });
+</script>
 {% endblock %}

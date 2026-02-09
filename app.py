@@ -1,11 +1,11 @@
-from flask import Flask, render_template, jsonify, session, redirect, url_for, request
+from flask import Flask, render_template, jsonify, redirect, url_for, request
 from intelligence_engine import generate_insights
 import pandas as pd
 import json
 import os
 
 app = Flask(__name__)
-app.secret_key = 'mosaic_spectre_key'  # Required for secure session management
+
 
 # --- CONFIGURATION ---
 # These filenames must match exactly what your Engines generate
@@ -40,26 +40,11 @@ def load_strategies():
 
 @app.route('/')
 def index():
-    if 'user' in session:
-        return redirect(url_for('dashboard'))
-    return render_template('login.html')
-
-@app.route('/login', methods=['POST'])
-def login():
-    # --- BYPASS MODE ---
-    # Automatically logs in anyone who clicks the button
-    # We assign a default user so the dashboard knows you are "logged in"
-    session['user'] = 'admin' 
     return redirect(url_for('dashboard'))
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('index'))
 
 @app.route('/dashboard')
 def dashboard():
-    if 'user' not in session: return redirect(url_for('index'))
+
     
     # 1. Load Real Data from the CSV
     data = load_analytics()
@@ -78,7 +63,7 @@ def dashboard():
 
 @app.route('/analytics')
 def analytics():
-    if 'user' not in session: return redirect(url_for('index'))
+
     
     # Load the real current data
     current_data = load_analytics()
@@ -102,7 +87,7 @@ def analytics():
 
 @app.route('/ai')
 def ai_reports():
-    if 'user' not in session: return redirect(url_for('index'))
+
     
     # Future Feature: We can filter 'strategies' by date here later
     strategies = load_strategies()
@@ -110,7 +95,7 @@ def ai_reports():
 
 @app.route('/settings')
 def settings():
-    if 'user' not in session: return redirect(url_for('index'))
+
     # Future Feature: 'Recalibrate' button will POST to a new route here
     return render_template('settings.html')
     

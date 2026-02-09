@@ -1,38 +1,58 @@
-/* --- THE SPECTRE THEME --- */
+/* --- THE SPECTRE THEME (Day/Night) --- */
 :root {
-    --bg-dark: #050505;       /* Deepest Black */
-    --bg-panel: #0f1218;      /* Panel Background */
-    --neon-cyan: #00f0ff;     /* Primary Glow */
-    --neon-purple: #bc13fe;   /* Secondary Glow */
-    --glass: rgba(22, 27, 34, 0.6); /* See-through effect */
+    /* Default Dark Mode */
+    --bg-body: #050505;
+    --bg-panel: #0f1218;
     --text-main: #edf2f7;
     --text-muted: #8b949e;
+    --glass: rgba(22, 27, 34, 0.6);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --neon-cyan: #00f0ff;
+    --shadow-color: rgba(0, 0, 0, 0.37);
+    --card-hover-border: rgba(0, 240, 255, 0.3);
+    --card-hover-shadow: rgba(0, 240, 255, 0.1);
+}
+
+[data-theme="light"] {
+    /* Light Mode Overrides */
+    --bg-body: #f4f6f8;
+    --bg-panel: #ffffff;
+    --text-main: #2d3748;
+    --text-muted: #718096;
+    --glass: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --neon-cyan: #007bff;
+    /* Darker blue for visibility against light bg */
+    --shadow-color: rgba(0, 0, 0, 0.05);
+    --card-hover-border: rgba(0, 123, 255, 0.3);
+    --card-hover-shadow: rgba(0, 123, 255, 0.1);
 }
 
 body {
-    background-color: var(--bg-dark);
-    /* Subtle grid background for tech vibe */
-    background-image: radial-gradient(#1f293a 1px, transparent 1px);
-    background-size: 40px 40px; 
+    background-color: var(--bg-body);
+    /* Subtle grid background */
+    background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+    background-size: 40px 40px;
     color: var(--text-main);
     font-family: 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Glassmorphism Cards */
 .glass-card {
     background: var(--glass);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
     border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: transform 0.3s ease;
+    box-shadow: 0 8px 32px 0 var(--shadow-color);
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .glass-card:hover {
-    border-color: rgba(0, 240, 255, 0.3);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+    border-color: var(--card-hover-border);
+    box-shadow: 0 0 15px var(--card-hover-shadow);
 }
 
 /* Sidebar Styling */
@@ -42,10 +62,11 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    background: rgba(13, 17, 23, 0.95);
-    border-right: 1px solid #30363d;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-color);
     padding-top: 20px;
     z-index: 1000;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .nav-link {
@@ -58,15 +79,59 @@ body {
     align-items: center;
 }
 
-.nav-link i { width: 25px; margin-right: 10px; }
+.nav-link i {
+    width: 25px;
+    margin-right: 10px;
+}
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: var(--neon-cyan);
     background: rgba(0, 240, 255, 0.08);
+    /* Keep subtle tint */
     box-shadow: 0 0 10px rgba(0, 240, 255, 0.05);
 }
 
+[data-theme="light"] .nav-link:hover,
+[data-theme="light"] .nav-link.active {
+    background: rgba(0, 123, 255, 0.08);
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.05);
+}
+
 /* Utilities */
-.text-neon { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,240,255,0.4); }
-.content-wrapper { margin-left: 260px; padding: 30px; }
-.stat-number { font-size: 2.5rem; font-weight: bold; color: white; }
+.text-neon {
+    color: var(--neon-cyan);
+    transition: color 0.3s ease;
+}
+
+/* Only apply text-shadow in dark mode for neon effect */
+[data-theme="dark"] .text-neon {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.content-wrapper {
+    margin-left: 260px;
+    padding: 30px;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+/* Text Color Utilities override for components using bootstrap classes if needed */
+.text-white {
+    color: var(--text-main) !important;
+    transition: color 0.3s ease;
+}
+
+.text-white-50 {
+    color: var(--text-muted) !important;
+    transition: color 0.3s ease;
+}
+
+.text-light {
+    color: var(--text-main) !important;
+    opacity: 0.8;
+}

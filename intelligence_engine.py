@@ -8,7 +8,7 @@ from groq import Groq
 
 # --- CONFIGURATION ---
 load_dotenv()
-API_KEY = os.getenv("GROQ_API_KEY")
+API_KEY = os.getenv("API_KEY")
 
 INPUT_FILE = 'zone_analytics.csv'
 OUTPUT_FILE = 'strategy_log.json'
