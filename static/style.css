@@ -1,126 +1,174 @@
-/* --- THE SPECTRE THEME (Day/Night) --- */
+/* --- PROJECT HYPER-MOSAIC: LUXE-GLASS EDITION --- */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;400;500;700&family=Outfit:wght@300;400;600;700&family=VT323&display=swap');
+
 :root {
-    /* Default Dark Mode */
-    --bg-body: #050505;
-    --bg-panel: #0f1218;
+    /* --- LUXE-GLASS PALETTE (Dark Default) --- */
+    --bg-body: #1a1d21;
+    /* Dark Slate */
+    --bg-panel: #262a2f;
+    /* Sidebar/Panels */
+    --accent-gold: #d4af37;
+    /* Champagne Gold */
+    --accent-teal: #2a9d8f;
+    /* Teal */
     --text-main: #edf2f7;
-    --text-muted: #8b949e;
-    --glass: rgba(22, 27, 34, 0.6);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --neon-cyan: #00f0ff;
-    --shadow-color: rgba(0, 0, 0, 0.37);
-    --card-hover-border: rgba(0, 240, 255, 0.3);
-    --card-hover-shadow: rgba(0, 240, 255, 0.1);
+    --text-muted: #94a3b8;
+
+    /* Glassmorphism */
+    --glass: rgba(255, 255, 255, 0.03);
+    --border-color: rgba(212, 175, 55, 0.15);
+    /* Subtle Gold Border */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+
+    /* Interaction */
+    --hover-lift: translateY(-5px);
+    --hover-glow: 0 10px 30px rgba(212, 175, 55, 0.15);
 }
 
 [data-theme="light"] {
-    /* Light Mode Overrides */
+    /* --- LUXE-GLASS PALETTE (Light Mode) --- */
     --bg-body: #f4f6f8;
+    /* Soft White */
     --bg-panel: #ffffff;
-    --text-main: #2d3748;
-    --text-muted: #718096;
-    --glass: rgba(255, 255, 255, 0.9);
-    --border-color: rgba(0, 0, 0, 0.1);
-    --neon-cyan: #007bff;
-    /* Darker blue for visibility against light bg */
+    --accent-gold: #b39226;
+    /* Darker Gold for visibility */
+    --accent-teal: #21867a;
+    /* Darker Teal */
+    --text-main: #1a1d21;
+    /* Dark Slate Text */
+    --text-muted: #64748b;
+
+    /* Glassmorphism */
+    --glass: rgba(255, 255, 255, 0.8);
+    --border-color: rgba(0, 0, 0, 0.05);
+    /* Subtle Dark Border */
     --shadow-color: rgba(0, 0, 0, 0.05);
-    --card-hover-border: rgba(0, 123, 255, 0.3);
-    --card-hover-shadow: rgba(0, 123, 255, 0.1);
+
+    --hover-glow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
+/* --- GLOBAL RESETS --- */
 body {
     background-color: var(--bg-body);
-    /* Subtle grid background */
-    background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
-    background-size: 40px 40px;
+    /* Soft ambient blobs handled via radial-gradient */
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(42, 157, 143, 0.03) 0%, transparent 40%);
     color: var(--text-main);
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: 'DM Sans', sans-serif;
+    /* Readable Body */
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* Glassmorphism Cards */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Outfit', sans-serif;
+    /* Modern Headers */
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+/* --- COMPONENT: LOGO --- */
+.logo-text {
+    font-family: 'VT323', monospace;
+    font-size: 3rem;
+    letter-spacing: 2px;
+    background: linear-gradient(to right, var(--accent-gold), #fff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+/* --- COMPONENT: GLASS CARD --- */
 .glass-card {
     background: var(--glass);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-color);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 8px 32px 0 var(--shadow-color);
-    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    border-radius: 20px;
+    /* Softer corners */
+    padding: 24px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow 0.4s ease,
+        border-color 0.4s ease;
 }
 
 .glass-card:hover {
-    border-color: var(--card-hover-border);
-    box-shadow: 0 0 15px var(--card-hover-shadow);
+    transform: var(--hover-lift);
+    box-shadow: var(--hover-glow);
+    border-color: var(--accent-gold);
 }
 
-/* Sidebar Styling */
+/* --- SIDEBAR --- */
 .sidebar {
     height: 100vh;
-    width: 260px;
+    width: 280px;
+    /* Slightly wider */
     position: fixed;
     top: 0;
     left: 0;
     background: var(--bg-panel);
     border-right: 1px solid var(--border-color);
-    padding-top: 20px;
+    padding-top: 30px;
     z-index: 1000;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .nav-link {
+    font-family: 'Outfit', sans-serif;
     color: var(--text-muted);
-    padding: 15px 25px;
-    margin: 5px 15px;
-    border-radius: 10px;
-    transition: 0.3s;
+    padding: 16px 30px;
+    margin: 8px 15px;
+    border-radius: 12px;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
+    font-weight: 500;
 }
 
 .nav-link i {
     width: 25px;
-    margin-right: 10px;
+    margin-right: 12px;
+    transition: transform 0.3s;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+    color: var(--accent-teal);
+    background: rgba(42, 157, 143, 0.08);
+    transform: translateX(5px);
+}
+
+.nav-link:hover i {
+    transform: scale(1.1);
+}
+
 .nav-link.active {
-    color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.08);
-    /* Keep subtle tint */
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.05);
+    color: var(--accent-gold);
+    background: rgba(212, 175, 55, 0.1);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.05);
 }
 
-[data-theme="light"] .nav-link:hover,
-[data-theme="light"] .nav-link.active {
-    background: rgba(0, 123, 255, 0.08);
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.05);
-}
-
-/* Utilities */
+/* --- UTILITIES --- */
 .text-neon {
-    color: var(--neon-cyan);
+    color: var(--accent-teal) !important;
     transition: color 0.3s ease;
 }
 
-/* Only apply text-shadow in dark mode for neon effect */
 [data-theme="dark"] .text-neon {
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    text-shadow: 0 0 15px rgba(42, 157, 143, 0.4);
 }
 
-.content-wrapper {
-    margin-left: 260px;
-    padding: 30px;
+.text-gold {
+    color: var(--accent-gold) !important;
 }
 
-.stat-number {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--text-main);
-}
-
-/* Text Color Utilities override for components using bootstrap classes if needed */
 .text-white {
     color: var(--text-main) !important;
     transition: color 0.3s ease;
@@ -131,7 +179,71 @@ body {
     transition: color 0.3s ease;
 }
 
-.text-light {
+.content-wrapper {
+    margin-left: 280px;
+    padding: 40px;
+}
+
+.stat-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -1px;
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-gold);
+}
+
+/* --- DATA GRIDS (Table Replacement) --- */
+.table {
+    color: var(--text-main);
+}
+
+.table th {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    border: none;
+    padding-bottom: 15px;
+    color: var(--text-muted);
+}
+
+.table td {
+    border: none;
+    padding: 15px 0;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+/* --- SPARKLINE & GLOW UTILS --- */
+.text-adaptive {
     color: var(--text-main) !important;
-    opacity: 0.8;
+    transition: color 0.3s ease;
+}
+
+.glow-text {
+    text-shadow: 0 0 10px currentColor;
+}
+
+.border-gold {
+    border-color: var(--accent-gold) !important;
 }

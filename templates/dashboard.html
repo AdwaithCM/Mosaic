@@ -1,73 +1,108 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Header / Greeting -->
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <h6 class="text-gold text-uppercase mb-1" style="letter-spacing: 2px;">System Overview</h6>
+        <h2 id="dynamic-greeting" class="text-adaptive fw-bold mb-0">Welcome Back</h2>
+    </div>
+</div>
+
 <div class="row mb-4">
+    <!-- VISITOR CARD -->
     <div class="col-md-4">
-        <div class="glass-card">
-            <h6 class="text-light opacity-75 text-uppercase">Total Visitors</h6>
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="stat-number text-white">{{ total_visitors }}</div>
-                <i class="fas fa-users fa-2x text-neon opacity-50"></i>
+        <div class="glass-card position-relative overflow-hidden">
+            <h6 class="text-muted text-uppercase small fw-bold">Total Visitors</h6>
+            <div class="d-flex justify-content-between align-items-end">
+                <div class="stat-number text-adaptive">{{ total_visitors }}</div>
+                <!-- Sparkline Placeholder (CSS/SVG) -->
+                <div class="text-adaptive" style="width: 80px; height: 40px; opacity: 0.5;">
+                    <svg viewBox="0 0 100 50" class="w-100 h-100">
+                        <path d="M0,50 L20,30 L40,40 L60,10 L80,25 L100,5" fill="none" stroke="currentColor"
+                            stroke-width="2" />
+                    </svg>
+                </div>
             </div>
-            <small class="text-success">↑ Live Count</small>
+            <small class="text-neon"><i class="fas fa-arrow-up me-1"></i>Live Count</small>
         </div>
     </div>
 
+    <!-- REVENUE CARD -->
     <div class="col-md-4">
-        <div class="glass-card">
-            <h6 class="text-light opacity-75 text-uppercase">Total Revenue</h6>
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="stat-number text-success">₹{{ total_revenue }}</div>
-                <i class="fas fa-dollar-sign fa-2x text-success opacity-50"></i>
+        <div class="glass-card position-relative overflow-hidden">
+            <h6 class="text-muted text-uppercase small fw-bold">Total Revenue</h6>
+            <div class="d-flex justify-content-between align-items-end">
+                <div class="stat-number text-gold">₹{{ total_revenue }}</div>
+                <div style="width: 80px; height: 40px; opacity: 0.8;">
+                    <svg viewBox="0 0 100 50" class="w-100 h-100">
+                        <path d="M0,45 L20,30 L40,25 L60,35 L80,10 L100,0" fill="none" stroke="#d4af37"
+                            stroke-width="2" />
+                    </svg>
+                </div>
             </div>
-            <small class="text-light opacity-50">― Daily Total</small>
+            <small class="text-adaptive opacity-50">― Daily Total</small>
         </div>
     </div>
 
+    <!-- CONVERSION CARD -->
     <div class="col-md-4">
-        <div class="glass-card">
-            <h6 class="text-light opacity-75 text-uppercase">Avg Conversion</h6>
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="stat-number text-warning">{{ avg_conversion }}%</div>
-                <i class="fas fa-chart-line fa-2x text-warning opacity-50"></i>
+        <div class="glass-card position-relative overflow-hidden">
+            <h6 class="text-muted text-uppercase small fw-bold">Avg Conversion</h6>
+            <div class="d-flex justify-content-between align-items-end">
+                <div class="stat-number text-neon">{{ avg_conversion }}%</div>
+                <div style="width: 80px; height: 40px; opacity: 0.5;">
+                    <svg viewBox="0 0 100 50" class="w-100 h-100">
+                        <path d="M0,25 L20,25 L40,20 L60,30 L80,20 L100,15" fill="none" stroke="#2a9d8f"
+                            stroke-width="2" />
+                    </svg>
+                </div>
             </div>
-            <small class="text-light opacity-50">Store Efficiency</small>
+            <small class="text-adaptive opacity-50">Store Efficiency</small>
         </div>
     </div>
 </div>
 
 <div class="row mb-4">
+    <!-- HEATMAP -->
     <div class="col-lg-8">
-        <div class="glass-card" style="height: 400px;">
+        <div class="glass-card h-100 d-flex flex-column">
             <div class="d-flex justify-content-between mb-3">
-                <h5><i class="fas fa-map-marked-alt text-neon me-2"></i>Store Heatmap</h5>
-                <button class="btn btn-sm btn-outline-light">Day</button>
+                <h5 class="text-adaptive"><i class="fas fa-map-marked-alt text-teal me-2"></i>Store Heatmap</h5>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Live View</button>
             </div>
 
             <div
-                class="d-flex align-items-center justify-content-center h-75 border border-secondary border-opacity-25 rounded bg-black bg-opacity-25 overflow-hidden">
+                class="flex-grow-1 border border-secondary border-opacity-10 rounded bg-black bg-opacity-20 overflow-hidden d-flex align-items-center justify-content-center">
                 <img src="{{ url_for('static', filename='final_heatmap1121.png') }}" alt="Store Heatmap Visualization"
-                    class="img-fluid" style="max-height: 100%; width: 100%; object-fit: contain;">
+                    class="img-fluid" style="max-height: 350px; width: 100%; object-fit: contain; opacity: 0.9;">
             </div>
         </div>
     </div>
 
+    <!-- EXECUTIVE BRIEFING (REPLACES ADDITIONAL FEATURES) -->
     <div class="col-lg-4">
-        <div class="glass-card" style="height: 400px;">
-            <h5><i class="fas fa-exclamation-circle text-neon me-2"></i>Additional Features</h5>
-            <hr class="border-secondary">
-            <div class="d-flex gap-3 mb-3">
-                <i class="fas fa-exclamation-triangle text-warning mt-1"></i>
-                <div>
-                    <small class="text-muted">10:45 AM</small>
-                    <div class="text-white">Congestion at Checkout</div>
-                </div>
-            </div>
-            <div class="d-flex gap-3 mb-3">
-                <i class="fas fa-info-circle text-info mt-1"></i>
-                <div>
-                    <small class="text-muted">10:30 AM</small>
-                    <div class="text-white">System Calibration Done</div>
+        <div class="glass-card h-100 d-flex flex-column">
+            <h5 class="text-gold mb-3" style="font-family: 'Outfit';"><i class="fas fa-terminal me-2"></i>EXECUTIVE
+                BRIEFING</h5>
+            <div class="flex-grow-1 p-3 rounded"
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); overflow-y: auto;">
+                <!-- TERMINAL STREAM -->
+                <div style="font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--text-muted);">
+                    <div class="mb-2"><span class="text-teal">[SYSTEM]</span> CONNECTED TO MOSAIC...</div>
+                    <div class="mb-2"><span class="text-teal">[INFO]</span> SYNCING ZONE DATA...</div>
+
+                    {% for zone in zones[:5] %}
+                    <div class="mb-2 border-bottom border-secondary border-opacity-10 pb-1">
+                        <span class="text-gold">>> SCANNING {{ zone.Zone_Name | upper }}</span><br>
+                        <span class="text-white ms-3">VISITORS: {{ zone.Visitors }} | REV: ${{ zone.Revenue }}</span>
+                        {% if zone.Conversion_Rate < 5 %} <br><span class="text-danger ms-3">[ALERT] LOW CONVERSION ({{
+                                zone.Conversion_Rate }}%)</span>
+                            {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="mb-0 animate-blink"><span class="text-teal">_</span></div>
                 </div>
             </div>
         </div>
@@ -77,11 +112,11 @@
 <div class="row">
     <div class="col-12">
         <div class="glass-card">
-            <h5 class="mb-3"><i class="fas fa-table text-neon me-2"></i>Zone Analytics</h5>
+            <h5 class="mb-3 text-adaptive"><i class="fas fa-table text-muted me-2"></i>Zone Analytics Grid</h5>
             <div class="table-responsive">
-                <table class="table table-dark table-hover mb-0" style="background: transparent;">
+                <table class="table mb-0">
                     <thead>
-                        <tr class="text-muted text-uppercase small">
+                        <tr class="text-uppercase small">
                             <th>Zone Name</th>
                             <th>Visitors</th>
                             <th>Avg Dwell Time</th>
@@ -92,16 +127,22 @@
                     <tbody>
                         {% for zone in zones %}
                         <tr>
-                            <td class="fw-bold text-neon">{{ zone.Zone_Name }}</td>
-                            <td>{{ zone.Visitors }}</td>
-                            <td>{{ zone.Avg_Dwell_Time }}s</td>
+                            <td class="fw-bold text-adaptive">{{ zone.Zone_Name }}</td>
+                            <td class="text-adaptive">{{ zone.Visitors }}</td>
+                            <td class="text-adaptive">{{ zone.Avg_Dwell_Time }}s</td>
                             <td>
-                                <span
-                                    class="badge {% if zone.Conversion_Rate > 15 %}bg-success{% elif zone.Conversion_Rate > 8 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-                                    {{ zone.Conversion_Rate }}%
-                                </span>
+                                <!-- Progress Bar Visualization for Conversion -->
+                                <div class="d-flex align-items-center">
+                                    <span class="text-adaptive me-2" style="width: 35px;">{{ zone.Conversion_Rate
+                                        }}%</span>
+                                    <div class="progress flex-grow-1"
+                                        style="height: 4px; background: rgba(128,128,128,0.2);">
+                                        <div class="progress-bar {% if zone.Conversion_Rate > 15 %}bg-success{% elif zone.Conversion_Rate > 8 %}bg-warning{% else %}bg-danger{% endif %}"
+                                            role="progressbar" style="width: {{ zone.Conversion_Rate }}%"></div>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="text-success fw-bold">${{ zone.Revenue }}</td>
+                            <td class="text-gold fw-bold">₹{{ zone.Revenue }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -110,4 +151,16 @@
         </div>
     </div>
 </div>
+
+<style>
+    @keyframes blink {
+        50% {
+            opacity: 0;
+        }
+    }
+
+    .animate-blink {
+        animation: blink 1s infinite;
+    }
+</style>
 {% endblock %}
