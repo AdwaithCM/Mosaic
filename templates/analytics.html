@@ -68,86 +68,130 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // --- 1. CONFIGURING THE REVENUE LINE CHART ---
-    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+    // --- GLOBAL CHART INSTANCES ---
+    let revenueChart = null;
+    let zoneChart = null;
 
-    // Create a "Glow" effect for the line
-    let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(0, 242, 255, 0.5)'); // Neon Blue
-    gradient.addColorStop(1, 'rgba(0, 242, 255, 0.0)');
+    // --- DATA PASSING ---
+    const dates = {{ dates | safe }};
+    const revenues = {{ revenues | safe }};
+    const zoneNames = {{ zone_names | safe }};
+    const conversions = {{ conversions | safe }};
 
-    new Chart(ctxRevenue, {
-        type: 'line',
-        data: {
-            labels: {{ dates | safe }}, // Passed from Python
-        datasets: [{
-            label: 'Revenue ($)',
-            data: {{ revenues | safe }}, // Passed from Python
-        borderColor: '#00f2ff', // Neon Blue Line
-        backgroundColor: gradient,
-        borderWidth: 3,
-        pointBackgroundColor: '#fff',
-        pointRadius: 5,
-        fill: true,
-        tension: 0.4 // Makes the line curved and smooth
-            }]
+    // --- THEME PALETTES ---
+    const THEMES = {
+        dark: {
+            text: '#94a3b8',
+            grid: 'rgba(255, 255, 255, 0.05)',
+            lineColor: '#d4af37', // Gold
+            fillStart: 'rgba(212, 175, 55, 0.4)',
+            fillEnd: 'rgba(212, 175, 55, 0.0)'
         },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                ticks: { color: '#ccc' }
-            },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#ccc' }
-            }
+        light: {
+            text: '#64748b',
+            grid: 'rgba(0, 0, 0, 0.05)',
+            lineColor: '#21867a', // Teal
+            fillStart: 'rgba(42, 157, 143, 0.3)',
+            fillEnd: 'rgba(42, 157, 143, 0.0)'
         }
+    };
+
+    function getThemeConfig() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        return THEMES[currentTheme];
     }
-    });
 
-    // --- 2. CONFIGURING THE ZONE BAR CHART ---
-    const ctxZone = document.getElementById('zoneChart').getContext('2d');
+    // --- CHART CREATION FUNCTION ---
+    function initCharts() {
+        const theme = getThemeConfig();
+        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        const ctxZone = document.getElementById('zoneChart').getContext('2d');
 
-    new Chart(ctxZone, {
-        type: 'bar',
-        data: {
-            labels: {{ zone_names | safe }},
-        datasets: [{
-            label: 'Conversion Rate (%)',
-            data: {{ conversions | safe }},
-        backgroundColor: [
-            'rgba(255, 77, 77, 0.7)',  // Red
-            'rgba(0, 255, 157, 0.7)',  // Green
-            'rgba(255, 204, 0, 0.7)',  // Yellow
-            'rgba(0, 242, 255, 0.7)'   // Blue
-        ],
-        borderColor: 'rgba(255,255,255,0.5)',
-        borderWidth: 1
-            }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                ticks: { color: '#ccc' }
+        // Destroy existing if re-initializing
+        if (revenueChart) revenueChart.destroy();
+        if (zoneChart) zoneChart.destroy();
+
+        // 1. REVENUE CHART
+        let gradientRev = ctxRevenue.createLinearGradient(0, 0, 0, 400);
+        gradientRev.addColorStop(0, theme.fillStart);
+        gradientRev.addColorStop(1, theme.fillEnd);
+
+        revenueChart = new Chart(ctxRevenue, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: revenues,
+                    borderColor: theme.lineColor,
+                    backgroundColor: gradientRev,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#ccc' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: theme.grid },
+                        ticks: { color: theme.text }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: theme.text }
+                    }
+                }
             }
-        }
+        });
+
+        // 2. ZONE CHART
+        zoneChart = new Chart(ctxZone, {
+            type: 'bar',
+            data: {
+                labels: zoneNames,
+                datasets: [{
+                    label: 'Conversion Rate (%)',
+                    data: conversions,
+                    backgroundColor: [
+                        'rgba(212, 175, 55, 0.8)',  // Gold
+                        'rgba(42, 157, 143, 0.8)',  // Teal
+                        'rgba(231, 111, 81, 0.8)',  // Orange
+                        'rgba(233, 196, 106, 0.8)'   // Yellow
+                    ],
+                    borderRadius: 5,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: theme.grid },
+                        ticks: { color: theme.text }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: theme.text }
+                    }
+                }
+            }
+        });
     }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', initCharts);
+
+    // --- EVENT LISTENER FOR THEME SWITCH ---
+    document.addEventListener('themeChanged', (e) => {
+        // e.detail contains 'light' or 'dark'
+        initCharts(); // Re-render with new theme colors
     });
 </script>
 {% endblock %}
