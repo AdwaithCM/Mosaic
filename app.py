@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, redirect, url_for, request
+from flask import Flask, render_template, jsonify, session, redirect, url_for, request
 from intelligence_engine import generate_insights
 import pandas as pd
 import json
@@ -54,12 +54,14 @@ def dashboard():
     total_visitors = sum(item['Visitors'] for item in data) if data else 0
     total_revenue = sum(item['Revenue'] for item in data) if data else 0
     avg_conversion = sum(item['Conversion_Rate'] for item in data) / len(data) if data else 0
-    
+    total_transactions = sum(item['Transactions'] for item in data) if data else 0
+
     return render_template('dashboard.html', 
                            zones=data, 
                            total_visitors=total_visitors, 
                            total_revenue=total_revenue,
-                           avg_conversion=round(avg_conversion, 2))
+                           avg_conversion=round(avg_conversion, 2),
+                           total_transactions=total_transactions)
 
 @app.route('/analytics')
 def analytics():

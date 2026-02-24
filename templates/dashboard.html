@@ -85,17 +85,17 @@
         <div class="glass-card h-100 d-flex flex-column">
             <h5 class="text-gold mb-3" style="font-family: 'Outfit';"><i class="fas fa-terminal me-2"></i>EXECUTIVE
                 BRIEFING</h5>
-            <div class="flex-grow-1 p-3 rounded"
-                style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); overflow-y: auto;">
-                <!-- TERMINAL STREAM -->
-                <div style="font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--text-muted);">
+            <div class="flex-grow-1 p-3 rounded terminal-window"
+                style="border: 1px solid var(--border-color); overflow-y: auto;">
+                <div class="terminal-text" style="font-family: 'VT323', monospace; font-size: 1.1rem;">
                     <div class="mb-2"><span class="text-teal">[SYSTEM]</span> CONNECTED TO MOSAIC...</div>
                     <div class="mb-2"><span class="text-teal">[INFO]</span> SYNCING ZONE DATA...</div>
 
                     {% for zone in zones[:5] %}
                     <div class="mb-2 border-bottom border-secondary border-opacity-10 pb-1">
                         <span class="text-gold">>> SCANNING {{ zone.Zone_Name | upper }}</span><br>
-                        <span class="text-white ms-3">VISITORS: {{ zone.Visitors }} | REV: ${{ zone.Revenue }}</span>
+                        <span class="terminal-metric ms-3">VISITORS: {{ zone.Visitors }} | REV: ₹{{ zone.Revenue
+                            }}</span>
                         {% if zone.Conversion_Rate < 5 %} <br><span class="text-danger ms-3">[ALERT] LOW CONVERSION ({{
                                 zone.Conversion_Rate }}%)</span>
                             {% endif %}
@@ -109,48 +109,59 @@
     </div>
 </div>
 
-<div class="row">
+<!-- FUNNEL-->
+<div class="row mb-4">
     <div class="col-12">
         <div class="glass-card">
-            <h5 class="mb-3 text-adaptive"><i class="fas fa-table text-muted me-2"></i>Zone Analytics Grid</h5>
-            <div class="table-responsive">
-                <table class="table mb-0">
-                    <thead>
-                        <tr class="text-uppercase small">
-                            <th>Zone Name</th>
-                            <th>Visitors</th>
-                            <th>Avg Dwell Time</th>
-                            <th>Conversion Rate</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for zone in zones %}
-                        <tr>
-                            <td class="fw-bold text-adaptive">{{ zone.Zone_Name }}</td>
-                            <td class="text-adaptive">{{ zone.Visitors }}</td>
-                            <td class="text-adaptive">{{ zone.Avg_Dwell_Time }}s</td>
-                            <td>
-                                <!-- Progress Bar Visualization for Conversion -->
-                                <div class="d-flex align-items-center">
-                                    <span class="text-adaptive me-2" style="width: 35px;">{{ zone.Conversion_Rate
-                                        }}%</span>
-                                    <div class="progress flex-grow-1"
-                                        style="height: 4px; background: rgba(128,128,128,0.2);">
-                                        <div class="progress-bar {% if zone.Conversion_Rate > 15 %}bg-success{% elif zone.Conversion_Rate > 8 %}bg-warning{% else %}bg-danger{% endif %}"
-                                            role="progressbar" style="width: {{ zone.Conversion_Rate }}%"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-gold fw-bold">₹{{ zone.Revenue }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <h5 class="mb-4 text-adaptive"><i class="fas fa-filter text-neon me-2"></i>Physical Conversion Pipeline</h5>
+
+            <div
+                class="d-flex flex-column flex-md-row justify-content-between align-items-center position-relative px-md-4">
+
+                <div
+                    class="funnel-step text-center p-4 rounded w-100 position-relative z-1 mosaic-border-cyan bg-cyan-glow">
+                    <h6 class="text-muted text-uppercase small fw-bold">1. Store Entries</h6>
+                    <h2 class="text-neon mb-0 fw-bold">{{ total_visitors }}</h2>
+                    <small class="text-adaptive opacity-75">Total Walk-ins</small>
+                </div>
+
+                <div class="funnel-connector my-3 my-md-0 px-2 px-lg-4 z-0 text-center">
+                    <i class="fas fa-chevron-right fa-2x text-muted opacity-25 d-none d-md-block"></i>
+                    <i class="fas fa-chevron-down fa-2x text-muted opacity-25 d-block d-md-none"></i>
+                    <div class="badge bg-secondary bg-opacity-50 text-adaptive mt-2 border border-secondary">100%
+                        Tracked</div>
+                </div>
+
+                <div
+                    class="funnel-step text-center p-4 rounded w-100 position-relative z-1 mosaic-border-gold bg-gold-glow">
+                    <h6 class="text-muted text-uppercase small fw-bold">2. Zone Engagements</h6>
+                    <h2 class="text-gold mb-0 fw-bold">{{ total_visitors }}</h2>
+                    <small class="text-adaptive opacity-75">Distributed Traffic</small>
+                </div>
+
+                <div class="funnel-connector my-3 my-md-0 px-2 px-lg-4 z-0 text-center">
+                    <i class="fas fa-chevron-right fa-2x text-muted opacity-25 d-none d-md-block"></i>
+                    <i class="fas fa-chevron-down fa-2x text-muted opacity-25 d-block d-md-none"></i>
+
+                    {% set overall_cr = (total_transactions / total_visitors * 100) | round(1) if total_visitors > 0
+                    else 0 %}
+                    <div class="badge bg-success bg-opacity-25 text-success mt-2 border border-success px-3 py-2">
+                        <i class="fas fa-arrow-down me-1"></i> {{ overall_cr }}% Conv.
+                    </div>
+                </div>
+
+                <div
+                    class="funnel-step text-center p-4 rounded w-100 position-relative z-1 mosaic-border-teal bg-teal-glow">
+                    <h6 class="text-muted text-uppercase small fw-bold">3. POS Transactions</h6>
+                    <h2 class="text-teal mb-0 fw-bold" style="color: #2a9d8f;">{{ total_transactions }}</h2>
+                    <small class="text-adaptive opacity-75">Completed Checkouts</small>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+
 
 <style>
     @keyframes blink {
@@ -161,6 +172,95 @@
 
     .animate-blink {
         animation: blink 1s infinite;
+    }
+
+
+    /* Dark Mode (Default) */
+    .terminal-window {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .terminal-text {
+        color: var(--text-muted, #8b949e);
+    }
+
+    .terminal-metric {
+        color: white;
+    }
+
+    /* Light Mode Override */
+    [data-theme="light"] .terminal-window {
+        background: rgba(248, 249, 250, 0.85);
+        /* Crisp off-white */
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .terminal-text {
+        color: #475569;
+        /* Medium charcoal for base text */
+    }
+
+    [data-theme="light"] .terminal-metric {
+        color: #0f172a;
+        /* Deep bold charcoal for metrics */
+        font-weight: bold;
+    }
+
+    /* --- FUNNEL CARD STYLES --- */
+
+    /* --- STEP 4: FUNNEL UI STYLES --- */
+    .funnel-step {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        min-width: 200px;
+    }
+
+    .funnel-step:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Dark Mode Defaults */
+    .mosaic-border-cyan {
+        border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .bg-cyan-glow {
+        background: rgba(0, 240, 255, 0.05);
+    }
+
+    .mosaic-border-gold {
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .bg-gold-glow {
+        background: rgba(212, 175, 55, 0.05);
+    }
+
+    .mosaic-border-teal {
+        border: 1px solid rgba(42, 157, 143, 0.3);
+    }
+
+    .bg-teal-glow {
+        background: rgba(42, 157, 143, 0.05);
+    }
+
+    /* Light Mode Overrides */
+    [data-theme="light"] .bg-cyan-glow,
+    [data-theme="light"] .bg-gold-glow,
+    [data-theme="light"] .bg-teal-glow {
+        background: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .mosaic-border-cyan {
+        border-color: rgba(0, 240, 255, 0.8);
+    }
+
+    [data-theme="light"] .mosaic-border-gold {
+        border-color: rgba(212, 175, 55, 0.8);
+    }
+
+    [data-theme="light"] .mosaic-border-teal {
+        border-color: rgba(42, 157, 143, 0.8);
     }
 </style>
 {% endblock %}

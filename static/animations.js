@@ -42,9 +42,9 @@ function initGreeting() {
     const hour = new Date().getHours();
     let text = "Welcome Back, Executive";
 
-    if (hour < 12) text = "Good Morning, Niranjan";
-    else if (hour < 18) text = "Good Afternoon, Niranjan";
-    else text = "Good Evening, Niranjan";
+    if (hour < 12) text = "Good Morning, Sir";
+    else if (hour < 18) text = "Good Afternoon, Sir";
+    else text = "Good Evening, Sir";
 
     // Typewriter Effect
     let i = 0;

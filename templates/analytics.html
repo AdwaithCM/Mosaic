@@ -36,26 +36,49 @@
 <div class="row">
     <div class="col-12">
         <div class="glass-card">
-            <h5 class="text-white mb-3">Raw Performance Metrics</h5>
+            <h5 class="mb-3 text-adaptive"><i class="fas fa-table text-teal me-2"></i>Zone Analytics Deep-Dive</h5>
             <div class="table-responsive">
-                <table class="table table-dark table-hover mb-0" style="background: transparent;">
+                <table class="table mb-0 mosaic-table" style="background: transparent;">
                     <thead>
-                        <tr class="text-white-50 small text-uppercase">
-                            <th>Zone Name</th>
-                            <th>Visitors</th>
-                            <th>Dwell Time</th>
-                            <th>Conversion</th>
-                            <th>Revenue</th>
+                        <tr class="text-uppercase small text-muted">
+                            <th class="pb-3 border-bottom-adaptive">Zone Name</th>
+                            <th class="pb-3 border-bottom-adaptive">Visitors</th>
+                            <th class="pb-3 border-bottom-adaptive">Avg Dwell Time</th>
+                            <th class="pb-3 border-bottom-adaptive" style="width: 30%;">Conversion Rate</th>
+                            <th class="pb-3 border-bottom-adaptive text-end">Revenue</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in analytics_data %}
+                        {% for zone in analytics_data %}
                         <tr>
-                            <td class="text-neon fw-bold">{{ row.Zone_Name }}</td>
-                            <td>{{ row.Visitors }}</td>
-                            <td>{{ row.Avg_Dwell_Time }}s</td>
-                            <td>{{ row.Conversion_Rate }}%</td>
-                            <td class="text-success">${{ row.Revenue }}</td>
+                            <td class="py-3 fw-bold text-adaptive border-bottom-adaptive">{{ zone.Zone_Name }}</td>
+                            <td class="py-3 text-adaptive border-bottom-adaptive">{{ zone.Visitors }}</td>
+                            <td class="py-3 border-bottom-adaptive">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-adaptive">{{ zone.Avg_Dwell_Time }}s</span>
+                                    {% if zone.Avg_Dwell_Time > 2650 %}
+                                    <span
+                                        class="badge bg-success bg-opacity-25 text-success border border-success rounded-pill px-2"
+                                        style="font-size: 0.7rem;">High</span>
+                                    {% else %}
+                                    <span
+                                        class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary rounded-pill px-2"
+                                        style="font-size: 0.7rem;">Standard</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-3 border-bottom-adaptive">
+                                <div class="d-flex align-items-center me-4">
+                                    <span class="text-adaptive me-3" style="width: 45px; text-align: right;">{{
+                                        zone.Conversion_Rate }}%</span>
+                                    <div class="progress flex-grow-1"
+                                        style="height: 6px; background: var(--progress-track);">
+                                        <div class="progress-bar {% if zone.Conversion_Rate > 15 %}bg-success{% elif zone.Conversion_Rate > 8 %}bg-warning{% else %}bg-danger{% endif %}"
+                                            role="progressbar" style="width: {{ zone.Conversion_Rate }}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 text-gold fw-bold border-bottom-adaptive text-end">₹{{ zone.Revenue }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -73,10 +96,10 @@
     let zoneChart = null;
 
     // --- DATA PASSING ---
-    const dates = {{ dates | safe }};
-    const revenues = {{ revenues | safe }};
-    const zoneNames = {{ zone_names | safe }};
-    const conversions = {{ conversions | safe }};
+    const dates = {{ dates | safe }} || [];
+    const revenues = {{ revenues | safe }} || [];
+    const zoneNames = {{ zone_names | safe }} || [];
+    const conversions = {{ conversions | safe }} || [];
 
     // --- THEME PALETTES ---
     const THEMES = {
@@ -194,4 +217,45 @@
         initCharts(); // Re-render with new theme colors
     });
 </script>
+
+<style>
+    /* Base (Dark Mode) Default Styles */
+    :root {
+        --progress-track: rgba(255, 255, 255, 0.1);
+    }
+
+    .text-adaptive {
+        color: #edf2f7 !important;
+    }
+
+    .border-bottom-adaptive {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-top: none !important;
+    }
+
+    /* Override Bootstrap table hover/stripes if any exist */
+    .mosaic-table> :not(caption)>*>* {
+        background-color: transparent !important;
+        box-shadow: inset 0 0 0 9999px transparent !important;
+    }
+
+    /* Light Mode Overrides */
+    [data-theme="light"] {
+        --progress-track: rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="light"] .text-adaptive {
+        color: #1e293b !important;
+        /* Dark Slate for high readability */
+    }
+
+    [data-theme="light"] .border-bottom-adaptive {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    [data-theme="light"] .text-muted {
+        color: #64748b !important;
+    }
+</style>
+
 {% endblock %}
