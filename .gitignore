@@ -1,6 +1,6 @@
 venv/
-mosaic*.csv
-correlated*.csv
+mosaic_*.csv
+sales_*.csv
 __pycache__/
 *.pyc
 *.pyo
