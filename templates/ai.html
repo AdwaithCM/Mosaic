@@ -3,130 +3,355 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
-        <div class="glass-card d-flex justify-content-between align-items-center">
+        <div class="glass-card d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
-                <h4 class="text-white mb-0"><i class="fas fa-brain text-neon me-2"></i>SPECTRE Neural Engine</h4>
-                <small class="text-white-50">Status: <span class="text-success">●
-                        Online</span></small>
+                <h4 class="text-adaptive mb-0" style="font-family: 'Outfit', sans-serif; letter-spacing: 1px;">
+                    <i class="fas fa-network-wired text-neon me-2"></i>SPECTRE Neural Engine
+                </h4>
+                <small class="text-success" style="font-family: 'VT323', monospace; font-size: 1.1rem;">
+                    <i class="fas fa-circle blink me-1"></i>SYSTEM ONLINE
+                </small>
             </div>
-            <button id="syncBtn" class="btn btn-outline-info btn-sm rounded-pill px-4 mx-3" onclick="runAI()">
-                <i class="fas fa-sync-alt me-2"></i> Run Live Analysis
 
-            </button>
-            <div class="text-end">
-                <button id="run-ai-btn" class="btn btn-outline-warning btn-sm" onclick="runAI()">
-                    <i class="fas fa-sync-alt me-1"></i> Recalibrate Now
+            <div class="d-flex align-items-center gap-4">
+                <div class="text-end d-none d-md-block">
+                    <small class="text-muted d-block text-uppercase"
+                        style="font-size: 0.7rem; letter-spacing: 1px;">Last Decrypt</small>
+                    <span class="text-neon fw-bold" style="font-family: 'VT323', monospace; font-size: 1.2rem;">
+                        {{ strategies[0].timestamp[11:16] if strategies else '00:00' }}
+                    </span>
+                </div>
+
+                <button id="syncBtn" class="btn terminal-btn-main px-4 py-2" onclick="runAI()">
+                    <i class="fas fa-terminal me-2"></i> EXECUTE ANALYSIS
                 </button>
-            </div>
-
-            <div class="text-end">
-                <small class="text-white-50 d-block">Last Analysis</small>
-                <span class="text-neon">{{ strategies[0].timestamp[11:16] if strategies else 'N/A' }}</span>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4">
     {% if not strategies %}
     <div class="col-12">
-        <div class="alert alert-danger">System Offline. Run Intelligence Engine.</div>
+        <div class="alert alert-dark border-danger text-danger"
+            style="font-family: 'VT323', monospace; font-size: 1.2rem;">
+            > ERROR: NO DATA FOUND. CLICK 'EXECUTE ANALYSIS' TO INITIALIZE. <span class="animate-blink">_</span>
+        </div>
     </div>
     {% else %}
 
-    <div class="col-12">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
-            {% for strat in strategies %}
-            <div class="glass-card h-100 position-relative"
-                style="border-top: 4px solid {% if strat.ai_analysis.priority == 'High' %}#ff4d4d{% elif strat.ai_analysis.priority == 'Medium' %}#ffcc00{% else %}#00ff9d{% endif %};">
+    {% for strat in strategies %}
+    <div class="col-md-6 col-xl-4">
+        <div class="terminal-card h-100 d-flex flex-column" data-priority="{{ strat.ai_analysis.priority }}">
 
-                <span class="position-absolute top-0 end-0 badge rounded-pill m-3"
-                    style="background: {% if strat.ai_analysis.priority == 'High' %}rgba(255, 77, 77, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d{% elif strat.ai_analysis.priority == 'Medium' %}rgba(255, 204, 0, 0.2); color: #ffcc00; border: 1px solid #ffcc00{% else %}rgba(0, 255, 157, 0.2); color: #00ff9d; border: 1px solid #00ff9d{% endif %};">
+            <div
+                class="terminal-card-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                <h5 class="mb-0 text-gold" style="font-family: 'VT323', monospace; font-size: 1.4rem;">
+                    > {{ strat.zone | upper }}
+                </h5>
+                <span class="badge priority-badge-{{ strat.ai_analysis.priority | lower }}">
                     {{ strat.ai_analysis.priority }}
                 </span>
-
-                <h5 class="text-white mb-1">{{ strat.zone }}</h5>
-                <span class="badge bg-secondary mb-3">{{ strat.ai_analysis.category }}</span>
-
-                <div class="mb-3">
-                    <h6 class="text-white-50 small"><i class="fas fa-search text-info me-1"></i> Insight</h6>
-                    <p class="text-light small">{{ strat.ai_analysis.diagnosis }}</p>
-                </div>
-
-                <div class="mb-3">
-                    <h6 class="text-white-50 small"><i class="fas fa-bolt text-warning me-1"></i> Action</h6>
-                    <p class="text-white small fw-bold">{{ strat.ai_analysis.action_plan }}</p>
-                </div>
-
-                <button type="button" class="btn btn-sm btn-outline-info w-100 mt-auto" data-bs-toggle="modal"
-                    data-bs-target="#modal-{{ loop.index }}">
-                    <i class="fas fa-file-alt me-2"></i> View Detailed Report
-                </button>
-
             </div>
 
-            <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content" style="background: #1a1a2e; border: 1px solid #00f2ff; color: white;">
-                        <div class="modal-header border-secondary">
-                            <h5 class="modal-title text-neon">{{ strat.zone }} Strategic Report</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <h6 class="text-muted text-uppercase small">Current Metrics</h6>
-                            <div class="d-flex gap-3 mb-3">
-                                <span class="badge bg-dark border border-secondary">Visitors: {{
-                                    strat.metrics_snapshot.visitors }}</span>
-                                <span class="badge bg-dark border border-secondary">Conv: {{
-                                    strat.metrics_snapshot.conversion }}%</span>
-                            </div>
+            <div class="terminal-body flex-grow-1"
+                style="font-family: 'VT323', monospace; font-size: 1.1rem; line-height: 1.4;">
+                <div class="mb-2">
+                    <span class="text-teal opacity-75">[TARGET]:</span>
+                    <span class="text-adaptive">{{ strat.ai_analysis.category }}</span>
+                </div>
 
-                            <h6 class="text-muted text-uppercase small">AI Analysis</h6>
-                            <p class="small" style="line-height: 1.8;">
-                                {{ strat.ai_analysis.detailed_report }}
-                            </p>
+                <div class="mb-3">
+                    <span class="text-teal opacity-75">[DIAGNOSIS]:</span>
+                    <span class="text-adaptive">{{ strat.ai_analysis.diagnosis }}</span>
+                </div>
 
-                            <div class="alert alert-success d-flex align-items-center mt-3"
-                                style="background: rgba(25, 135, 84, 0.2); border: 1px solid #198754; color: #75b798;">
-                                <i class="fas fa-rocket me-2"></i>
-                                <div>
-                                    <strong>Projected Outcome:</strong> {{ strat.ai_analysis.expected_outcome }}
-                                </div>
-                            </div>
-                        </div>
+                <div class="action-box p-3 mb-4 rounded">
+                    <div class="text-warning mb-1"><i class="fas fa-bolt me-2"></i>[COMMAND PROTOCOL]</div>
+                    <div class="text-white fw-bold" style="font-family: 'Outfit', sans-serif; font-size: 1rem;">
+                        {{ strat.ai_analysis.action_plan }}
                     </div>
                 </div>
             </div>
-            {% endfor %}
+
+            <button class="btn terminal-btn-sub w-100 mt-auto" data-bs-toggle="modal"
+                data-bs-target="#modal-{{ loop.index }}">
+                [ OPEN FULL REPORT ]
+            </button>
+
         </div>
     </div>
+
+    <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content terminal-modal">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="modal-title text-neon" style="font-family: 'VT323', monospace; font-size: 1.5rem;">
+                        > DECRYPTING {{ strat.zone | upper }} REPORT...
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="font-family: 'VT323', monospace; font-size: 1.2rem;">
+
+                    <div class="row mb-4 g-2">
+                        <div class="col-4">
+                            <div class="hud-metric p-2 text-center rounded border border-secondary border-opacity-25">
+                                <div class="text-teal opacity-75 small fw-bold mb-1">VISITORS</div>
+                                <div class="text-white fw-bold fs-5">{{ strat.metrics_snapshot.visitors }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="hud-metric p-2 text-center rounded border border-secondary border-opacity-25">
+                                <div class="text-teal opacity-75 small fw-bold mb-1">CONVERSION</div>
+                                <div class="text-white fw-bold fs-5">{{ strat.metrics_snapshot.conversion }}%</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="hud-metric p-2 text-center rounded border border-secondary border-opacity-25">
+                                <div class="text-teal opacity-75 small fw-bold mb-1">DWELL TIME</div>
+                                <div class="text-white fw-bold fs-5">{{ strat.metrics_snapshot.dwell_time }}s</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-teal opacity-75">[AI DEEP DIVE ANALYSIS]</h6>
+                        <p class="text-adaptive"
+                            style="line-height: 1.6; font-family: 'Outfit', sans-serif; font-size: 1rem;">
+                            {{ strat.ai_analysis.detailed_report }}
+                        </p>
+                    </div>
+
+                    <div class="outcome-box p-3 rounded d-flex align-items-center">
+                        <i class="fas fa-chart-line text-success fa-2x me-3"></i>
+                        <div>
+                            <div class="text-success small fw-bold">[PROJECTED OUTCOME]</div>
+                            <div class="text-adaptive" style="font-family: 'Outfit', sans-serif;">{{
+                                strat.ai_analysis.expected_outcome }}</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
     {% endif %}
 </div>
+
+<style>
+    @keyframes blink {
+        50% {
+            opacity: 0;
+        }
+    }
+
+    .blink {
+        animation: blink 1.5s infinite;
+    }
+
+    .animate-blink {
+        animation: blink 1s infinite;
+    }
+
+    /* --- DARK MODE TERMINAL UI (DEFAULT) --- */
+    .terminal-card {
+        background: rgba(10, 10, 15, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .terminal-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Dynamic Border Top based on Priority */
+    .terminal-card[data-priority="High"] {
+        border-top: 3px solid #ff4d4d;
+    }
+
+    .terminal-card[data-priority="Medium"] {
+        border-top: 3px solid #ffcc00;
+    }
+
+    .terminal-card[data-priority="Low"] {
+        border-top: 3px solid #00ff9d;
+    }
+
+    /* Priority Badges */
+    .priority-badge-high {
+        background: rgba(255, 77, 77, 0.15);
+        color: #ff4d4d;
+        border: 1px solid #ff4d4d;
+    }
+
+    .priority-badge-medium {
+        background: rgba(255, 204, 0, 0.15);
+        color: #ffcc00;
+        border: 1px solid #ffcc00;
+    }
+
+    .priority-badge-low {
+        background: rgba(0, 255, 157, 0.15);
+        color: #00ff9d;
+        border: 1px solid #00ff9d;
+    }
+
+    .action-box {
+        background: rgba(255, 193, 7, 0.05);
+        border-left: 3px solid #ffc107;
+    }
+
+    .outcome-box {
+        background: rgba(25, 135, 84, 0.1);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+
+    .terminal-modal {
+        background: rgba(15, 20, 30, 0.95);
+        backdrop-filter: blur(15px);
+        border: 1px solid #00f2ff;
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+    }
+
+    /* Buttons */
+    .terminal-btn-main {
+        background: rgba(0, 242, 255, 0.1);
+        color: #00f2ff;
+        border: 1px solid #00f2ff;
+        font-family: 'VT323', monospace;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .terminal-btn-main:hover,
+    .terminal-btn-main:focus {
+        background: #00f2ff;
+        color: #000;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+    }
+
+    .terminal-btn-sub {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        font-family: 'VT323', monospace;
+        transition: all 0.3s ease;
+    }
+
+    .terminal-btn-sub:hover {
+        border-color: #00f2ff;
+        color: #00f2ff;
+        background: rgba(0, 242, 255, 0.05);
+    }
+
+    /* --- LIGHT MODE OVERRIDES --- */
+    [data-theme="light"] .terminal-card {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .terminal-card[data-priority="High"] {
+        border-top: 4px solid #dc3545;
+    }
+
+    [data-theme="light"] .terminal-card[data-priority="Medium"] {
+        border-top: 4px solid #ffc107;
+    }
+
+    [data-theme="light"] .terminal-card[data-priority="Low"] {
+        border-top: 4px solid #198754;
+    }
+
+    [data-theme="light"] .action-box {
+        background: #fffdf5;
+        border-left: 3px solid #ffc107;
+    }
+
+    [data-theme="light"] .action-box .text-white {
+        color: #212529 !important;
+    }
+
+    [data-theme="light"] .outcome-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+    }
+
+    [data-theme="light"] .terminal-modal {
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="light"] .modal-header .text-neon {
+        color: #0d6efd !important;
+    }
+
+    /* Fix 2: Force light mode inversions here */
+    [data-theme="light"] .btn-close-white {
+        filter: none !important;
+    }
+
+    [data-theme="light"] .hud-metric .text-white {
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .terminal-btn-main {
+        background: #f8f9fa;
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+    [data-theme="light"] .terminal-btn-main:hover {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+    [data-theme="light"] .terminal-btn-sub {
+        border: 1px dashed #adb5bd;
+        color: #495057;
+    }
+
+    [data-theme="light"] .terminal-btn-sub:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
+        background: rgba(13, 110, 253, 0.05);
+    }
+
+    [data-theme="light"] .hud-metric {
+        background: #f8f9fa;
+    }
+</style>
+
 <script>
     function runAI() {
         const btn = document.getElementById('syncBtn');
         const originalText = btn.innerHTML;
 
-        // 1. Change button to loading state
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Analyzing...';
+        // Change button to loading state
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> DECRYPTING...';
         btn.disabled = true;
 
-        // 2. Call Python Route
+        // Call Python Route
         fetch('/run_intelligence', { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // 3. If success, reload page to see new data
-                    location.reload();
+                    location.reload(); // Reloads to show new JSON data
                 } else {
-                    alert("Error: " + data.message);
+                    alert("System Error: " + data.message);
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("Server Connection Failed");
+                alert("Neural Engine Connection Failed.");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             });

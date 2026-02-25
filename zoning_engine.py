@@ -2,46 +2,55 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import pickle
 import os
+import glob
 
 # --- CONFIGURATION ---
-INPUT_FILE = 'mosaic_history_24.csv'
 MODEL_OUTPUT = 'zone_model.pkl'
 N_ZONES = 4 
 
 def train_zoning_model():
-    print("🛰️  SPECTRE SYSTEM: Initializing Dynamic Zoning...")
+    print("🛰️  SPECTRE SYSTEM: Initializing Global Dynamic Zoning...")
     
-    if not os.path.exists(INPUT_FILE):
-        print(f"❌ Error: {INPUT_FILE} not found.")
+    tracking_files = sorted(glob.glob('mosaic_history_*.csv'))
+    
+    if not tracking_files:
+        print("❌ Error: No 'mosaic_history_*.csv' files found in the directory.")
         return
 
-    # 1. Load coordinates
-    # FIX: Using usecols to save memory and ensure we only pull x,y
-    df = pd.read_csv(INPUT_FILE, usecols=['x', 'y'])
+    print(f"📁 Found {len(tracking_files)} tracking files. Combining data for Global AI Training...")
     
-    # FIX: Dropping duplicates for training. 
-    # If a person stands still for 1000 frames, we don't want to over-weight 
-    # that one spot. We want to find general store "areas".
-    unique_coords = df.drop_duplicates()
-    
-    print(f"🧬 Analyzing {len(unique_coords)} unique density points...")
+    all_coords = []
+    for file in tracking_files:
+        try:
+            df_part = pd.read_csv(file, usecols=['x', 'y'])
+            all_coords.append(df_part)
+            print(f"   -> Loaded {len(df_part)} points from {file}")
+        except Exception as e:
+            print(f"   ❌ Error reading {file}: {e}")
+            
+    # SAFETY CHECK: Ensure we actually loaded data before concatenating
+    if not all_coords:
+        print("❌ Error: No valid data could be extracted from the tracking files.")
+        return
 
-    # 2. Train K-Means
-    # init='k-means++' ensures better initial placement of centers
+    df_combined = pd.concat(all_coords, ignore_index=True)
+    
+    # Clean the data for spatial mapping
+    unique_coords = df_combined.drop_duplicates()
+    
+    print(f"\n🧬 Analyzing {len(unique_coords)} unique density points across the entire week...")
+
+    # Train K-Means
     kmeans = KMeans(n_clusters=N_ZONES, init='k-means++', random_state=42, n_init=10)
     kmeans.fit(unique_coords)
 
-    # 3. Save the model and the feature names
-    # FIX: We save the feature names to prevent "UserWarnings" in future 
-    # when predicting coordinates in different scripts.
+    # Save the model
     kmeans.feature_names_in_ = ['x', 'y'] 
-
     with open(MODEL_OUTPUT, 'wb') as f:
         pickle.dump(kmeans, f)
     
-    print(f"✅ Step 1 Complete: Model saved to {MODEL_OUTPUT}")
+    print(f"\n✅ Step 1 Complete: Global AI Model saved to {MODEL_OUTPUT}")
     
-    # 4. Show discovered centers
     centers = kmeans.cluster_centers_
     for i, center in enumerate(centers):
         print(f"📍 Zone {i} Center: X={center[0]:.0f}, Y={center[1]:.0f}")
