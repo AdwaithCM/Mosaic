@@ -12,40 +12,23 @@ API_KEY = os.getenv("API_KEY")
 
 INPUT_FILE = 'zone_analytics.csv'
 OUTPUT_FILE = 'strategy_log.json'
-HISTORY_FILE = 'strategy_history.json'
 
 def get_retail_context_map():
     return {
-        'Electronics': 'Context: High-ticket items (TVs, Laptops). High dwell time is good (researching), but needs staff to close sales.',
-        'Groceries': 'Context: Fast-moving goods. Long dwell time is BAD (means confusion). High traffic, low margin.',
-        'Home': 'Context: Furniture/Decor. Requires visualization. Moderate dwell time expected.',
-        'Beauty': 'Context: Impulse buys & testing. Needs high engagement. Staff interaction is key.'
+        'Electronics': 'High-ticket items. High Dwell + Low Conv = Customers are confused or need staff to close the sale. High Dwell + High Conv = Excellent product engagement.',
+        'Groceries': 'Fast-moving goods. Long Dwell Time is BAD (means poor layout or hard-to-find items). Low Conversion means out-of-stock items or pricing resistance.',
+        'Home': 'Furniture & Decor. Moderate Dwell Time expected for visualization. Low Conversion means displays are uninspiring.',
+        'Beauty': 'Impulse buys & testing. Short Dwell Time means poor display visibility. High Dwell + Low Conv means testers are used but prices are too high.'
     }
 
-# --- FALLBACK SIMULATION (Updated for Detail) ---
 def generate_offline_strategies(df):
     print("\n   ⚠️ API ERROR: Switching to OFFLINE MODE.")
     insights = []
     for index, row in df.iterrows():
-        zone = row['Zone_Name']
-        conv = row['Conversion_Rate']
-        visitors = row['Visitors']
-        
-        # Default fallback logic
-        category, priority = "General", "Medium"
-        diagnosis = f"Traffic: {visitors}, Conversion: {conv}%."
-        action = "Check zone for bottlenecks."
-        detail = "Offline mode active. Detailed analysis unavailable."
-
-        if conv < 5:
-            category, priority = "Marketing", "High"
-            action = "Launch 'Flash Sale' for impulse buyers."
-            detail = f"CRITICAL: Only {conv}% of {visitors} visitors bought items. This indicates high interest but price resistance. Immediate Recommendation: Deploy red '50% OFF' signage at eye level to break hesitation."
-        
         entry = {
             "id": str(uuid.uuid4()),
             "timestamp": datetime.now().isoformat(),
-            "zone": zone,
+            "zone": row['Zone_Name'],
             "metrics_snapshot": {
                 "visitors": int(row['Visitors']),
                 "conversion": float(row['Conversion_Rate']),
@@ -53,28 +36,26 @@ def generate_offline_strategies(df):
                 "revenue": float(row['Revenue'])
             },
             "ai_analysis": {
-                "category": category,
-                "priority": priority,
-                "diagnosis": diagnosis,
-                "action_plan": action,
-                "expected_outcome": "Projected 10% uplift.",
-                "detailed_report": detail # <--- NEW FIELD
+                "category": "System", "priority": "Low",
+                "diagnosis": "Offline Mode Active.", "action_plan": "Check API Key.",
+                "detailed_report": "The AI engine could not connect. Check your internet or Groq API key.",
+                "expected_outcome": "N/A"
             }
         }
         insights.append(entry)
     return insights
 
 def generate_insights():
-    print("🔮 SPECTRE INTELLIGENCE: Initializing Llama 3 (Groq)...")
+    print("🔮 SPECTRE INTELLIGENCE: Initializing Llama 3.3 (Groq)...")
 
     if not API_KEY or not os.path.exists(INPUT_FILE):
-        print("❌ Configuration Error.")
+        print("❌ Configuration Error: Missing API Key or zone_analytics.csv")
         return
     
     df = pd.read_csv(INPUT_FILE)
     if df.empty: return
 
-    # --- PREPARE DATA ---
+    # --- 1. COMPILE STRICT DATA CONTEXT ---
     batch_data_str = ""
     context_map = get_retail_context_map()
     
@@ -82,54 +63,66 @@ def generate_insights():
         zone = row['Zone_Name']
         context = context_map.get(zone, "General Retail")
         batch_data_str += (
-            f"--- ZONE: {zone} ---\n"
-            f"{context}\n"
-            f"DATA: Visitors={row['Visitors']}, Dwell Time={row['Avg_Dwell_Time']}s, "
-            f"Conversion={row['Conversion_Rate']}%, Revenue=${row['Revenue']}\n\n"
+            f"ZONE: [{zone}]\n"
+            f" - Rules: {context}\n"
+            f" - Metrics Today: {row['Visitors']} Visitors | {row['Avg_Dwell_Time']} min Avg Dwell | {row['Conversion_Rate']}% Conversion | ₹{row['Revenue']} Revenue\n\n"
         )
 
-    # --- CALL GROQ API ---
+    # --- 2. THE HIGH-PERFORMANCE PROMPT (MERGED & OPTIMIZED) ---
+    system_prompt = (
+        "Role: You are SPECTRE, an elite, data-obsessed Senior Retail Strategist for a flagship store. "
+        "You analyze physical store metrics and output strict JSON. You NEVER give generic advice."
+    )
+    
+    user_prompt = f"""
+    Analyze the following retail zones based on today's tracking data:
+    
+    {batch_data_str}
+    
+    RULES FOR ANALYSIS:
+    1. BE HYPER-SPECIFIC: Never use generic phrases like "improve layout" or "train staff". Give exact physical commands like "Move high-margin impulse items to the front endcap."
+    2. CITE THE NUMBERS: You MUST embed the exact metrics from the input data in your report (e.g., "Since dwell time is 8.5s and conversion is only 4%...").
+    3. EXPLAIN THE 'WHY': Connect the metrics to human behavior and consumer psychology. Why are they dwelling but not buying? Why are they buying without dwelling?
+    4. ACTIONABLE NOW: The 'action_plan' must be a physical change a store manager can execute in under 2 hours.
+
+    OUTPUT JSON SCHEMA:
+    {{
+      "strategies": [
+        {{
+          "zone_name": "exact zone name from data",
+          "category": "Staffing" or "Inventory" or "Marketing" or "Layout",
+          "priority": "High" or "Medium" or "Low",
+          "diagnosis": "Short summary (Max 1 sentence describing the harsh truth of the data).",
+          "action_plan": "Short tactic (Max 10 words - e.g., 'Deploy red 50% OFF signage at eye level').",
+          "detailed_report": "Long paragraph (50-80 words). Sentence 1: The data reality. Sentence 2: The psychological 'Why'. Sentence 3: The precise physical solution.",
+          "expected_outcome": "Specific projected metric improvement (e.g., 'Projected 15% conversion uplift')."
+        }}
+      ]
+    }}
+    """
+
+    # --- 3. CALL GROQ API ---
     try:
         client = Groq(api_key=API_KEY)
+        print("   ...Transmitting Data to Neural Engine...")
         
-        # --- THE SHERLOCK PROMPT ---
-        prompt = (
-            f"Role: Senior Retail Strategist for a flagship store.\n"
-            f"Input Data:\n{batch_data_str}\n"
-            f"Task: Analyze the data and generate a JSON response.\n"
-            f"Rules for 'detailed_report':\n"
-            f"1. Be SPECIFIC. Don't say 'improve layout'. Say 'Move high-margin items to the front'.\n"
-            f"2. Cite the numbers. Say 'Since dwell time is {row['Avg_Dwell_Time']}s...'\n"
-            f"3. Explain the 'Why'. Connect the metric to the behavior.\n\n"
-            f"Output JSON Format:\n"
-            f"{{ 'strategies': [ {{ \n"
-            f"  'zone_name': '...', \n"
-            f"  'category': 'Staffing/Inventory/Marketing/Layout', \n"
-            f"  'priority': 'High/Medium/Low', \n"
-            f"  'diagnosis': 'Short summary (1 sentence)', \n"
-            f"  'action_plan': 'Short tactic (Max 10 words)', \n"
-            f"  'detailed_report': 'Long paragraph (50-80 words) explaining the problem and specific solution.', \n"
-            f"  'expected_outcome': '...' \n"
-            f"}} ] }}"
-        )
-
-        print("   ...Sending Data to Llama 3...")
         chat_completion = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are a JSON-only API. Output strictly valid JSON."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ],
             model="llama-3.3-70b-versatile",
-            temperature=0.6,
+            temperature=0.3, # Low temperature for highly logical, non-hallucinated responses
             response_format={"type": "json_object"}
         )
 
         response_text = chat_completion.choices[0].message.content
         master_json = json.loads(response_text)
         
-        # Merging Logic
+        # Merge with original data
         strategies_list = master_json.get('strategies', [])
         current_insights = []
+        
         for item in strategies_list:
             zone_name = item.get('zone_name')
             matching_rows = df[df['Zone_Name'] == zone_name]
@@ -143,21 +136,22 @@ def generate_insights():
                     "metrics_snapshot": {
                         "visitors": int(original_row['Visitors']),
                         "conversion": float(original_row['Conversion_Rate']),
+                        "dwell_time": float(original_row['Avg_Dwell_Time']),
                         "revenue": float(original_row['Revenue'])
                     },
-                    "ai_analysis": item # Directly use the AI's rich object
+                    "ai_analysis": item 
                 }
                 current_insights.append(entry)
         
-        print("   ✅ Llama 3 Analysis Successful!")
+        with open(OUTPUT_FILE, 'w') as f:
+            json.dump(current_insights, f, indent=4)
+        print(f"   ✅ Llama 3 Analysis Successful! Saved to {OUTPUT_FILE}")
 
     except Exception as e:
         print(f"   ⚠️ Groq API Failed: {e}")
         current_insights = generate_offline_strategies(df)
-
-    with open(OUTPUT_FILE, 'w') as f:
-        json.dump(current_insights, f, indent=4)
-    print(f"✅ Data saved to {OUTPUT_FILE}")
+        with open(OUTPUT_FILE, 'w') as f:
+            json.dump(current_insights, f, indent=4)
 
 if __name__ == "__main__":
     generate_insights()

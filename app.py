@@ -6,20 +6,18 @@ import os
 
 app = Flask(__name__)
 
-
 # --- CONFIGURATION ---
-# These filenames must match exactly what your Engines generate
 ANALYTICS_FILE = 'zone_analytics.csv'
+HISTORICAL_FILE = 'historical_analytics.csv' # Added the new Data Warehouse
 STRATEGY_FILE = 'strategy_log.json'
 
 # --- DATA LOADERS ---
 def load_analytics():
-    """Reads the KPI CSV and returns a list of dictionaries for the UI."""
+    """Reads the Live Cache (Latest Day) KPI CSV."""
     if not os.path.exists(ANALYTICS_FILE):
         return []
     try:
         df = pd.read_csv(ANALYTICS_FILE)
-        # Converts DataFrame to: [{'Zone_Name': 'Electronics', 'Visitors': 100}, ...]
         return df.to_dict(orient='records')
     except Exception as e:
         print(f"Error loading analytics: {e}")
@@ -36,6 +34,23 @@ def load_strategies():
         print(f"Error loading strategies: {e}")
         return []
 
+
+def get_latest_zone_data():
+    """Reads the live zone_analytics.csv cache and returns it as a dictionary for the dashboard."""
+    if not os.path.exists('zone_analytics.csv'):
+        print("⚠️ Warning: zone_analytics.csv not found.")
+        return []
+    
+    try:
+        df = pd.read_csv('zone_analytics.csv')
+        # Converts the dataframe into a list of dictionaries that HTML can read
+        return df.to_dict('records') 
+    except Exception as e:
+        print(f"❌ Error reading zone data: {e}")
+        return []
+
+
+
 # --- ROUTES ---
 
 @app.route('/')
@@ -44,42 +59,68 @@ def index():
 
 @app.route('/dashboard')
 def dashboard():
+    # 1. Load the latest zone data
+    zones = get_latest_zone_data()
+    
+    # 2. Calculate basic metrics
+    total_visitors = sum(z['Visitors'] for z in zones)
+    total_revenue = sum(z['Revenue'] for z in zones)
+    avg_conversion = 0
+    if len(zones) > 0:
+        avg_conversion = round(sum(z['Conversion_Rate'] for z in zones) / len(zones), 1)
 
+    # 3. MOCK DATA: Historical Transactions (Keep what you had)
+    total_transactions = int(total_visitors * (avg_conversion / 100))
+
+    # --- THE GOLDEN HOUR CALCULATOR ---
+    # In a real app, this would read historical time-series data. 
+    # For now, we dynamically find the most stressed zone today.
+    peak_zone = max(zones, key=lambda x: x['Visitors']) if zones else None
     
-    # 1. Load Real Data from the CSV
-    data = load_analytics()
-    
-    # 2. Calculate Total Store Metrics (Server-Side Logic)
-    # This prevents the UI from having to do complex math
-    total_visitors = sum(item['Visitors'] for item in data) if data else 0
-    total_revenue = sum(item['Revenue'] for item in data) if data else 0
-    avg_conversion = sum(item['Conversion_Rate'] for item in data) / len(data) if data else 0
-    total_transactions = sum(item['Transactions'] for item in data) if data else 0
+    peak_ops = {
+        "expected_load": int(total_visitors * 1.5), # Estimate 50% more during peak
+        "critical_zone": peak_zone['Zone_Name'].upper() if peak_zone else "SYSTEM_WAIT",
+        "critical_issue": "SEVERE LOAD",
+        "actions": [
+            f"Pause restocking in {peak_zone['Zone_Name']} immediately.",
+            "Open overflow registers 3 & 4.",
+            f"Re-deploy 1 staff member to {peak_zone['Zone_Name']}."
+        ]
+    }
 
     return render_template('dashboard.html', 
-                           zones=data, 
-                           total_visitors=total_visitors, 
+                           zones=zones,
+                           total_visitors=total_visitors,
                            total_revenue=total_revenue,
-                           avg_conversion=round(avg_conversion, 2),
-                           total_transactions=total_transactions)
+                           avg_conversion=avg_conversion,
+                           total_transactions=total_transactions,
+                           peak_ops=peak_ops) # Inject the new intelligence!
 
 @app.route('/analytics')
 def analytics():
-
-    
-    # Load the real current data
+    # Load the real current data for the Bar Charts
     current_data = load_analytics()
-    
-    # --- MOCK HISTORY DATA (For Visualization) ---
-    # This simulates the last 7 days of revenue
-    # Notice the jump in the last 2 days (The "AI Effect")
-    history_dates = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun (Today)']
-    history_revenue = [12500, 13200, 11800, 12100, 14500, 16800, 17887] 
-    
-    # Prepare Zone Names and Conversion Rates for the Bar Chart
     zone_names = [item['Zone_Name'] for item in current_data]
     zone_conversions = [item['Conversion_Rate'] for item in current_data]
     
+    # --- LOAD REAL HISTORICAL DATA FOR THE LINE CHART ---
+    history_dates = []
+    history_revenue = []
+    
+    if os.path.exists(HISTORICAL_FILE):
+        try:
+            df_hist = pd.read_csv(HISTORICAL_FILE)
+            # Group by Date and sum the Revenue across all zones for that day
+            daily_revenue = df_hist.groupby('Date')['Revenue'].sum().reset_index()
+            
+            # Convert to lists for Chart.js
+            history_dates = daily_revenue['Date'].tolist()
+            history_revenue = daily_revenue['Revenue'].tolist()
+        except Exception as e:
+            print(f"❌ Error loading historical data: {e}")
+    else:
+        print(f"⚠️ Warning: {HISTORICAL_FILE} not found. Charts will be empty.")
+
     return render_template('analytics.html', 
                            analytics_data=current_data,
                            dates=json.dumps(history_dates),
@@ -89,16 +130,11 @@ def analytics():
 
 @app.route('/ai')
 def ai_reports():
-
-    
-    # Future Feature: We can filter 'strategies' by date here later
     strategies = load_strategies()
     return render_template('ai.html', strategies=strategies)
 
 @app.route('/settings')
 def settings():
-
-    # Future Feature: 'Recalibrate' button will POST to a new route here
     return render_template('settings.html')
     
 # --- NEW ROUTE: TRIGGERS THE AI MANUALLY ---
@@ -106,12 +142,11 @@ def settings():
 def run_intelligence():
     try:
         print("⚡ Manual Trigger: Running Intelligence Engine...")
-        generate_insights() # Calls the function from your other file
+        generate_insights() 
         return jsonify({'status': 'success', 'message': 'Analysis Complete'})
     except Exception as e:
         print(f"❌ Error: {e}")
         return jsonify({'status': 'error', 'message': str(e)})    
 
 if __name__ == '__main__':
-    # Debug=True allows auto-reload when you change code
     app.run(debug=True, port=5000)
