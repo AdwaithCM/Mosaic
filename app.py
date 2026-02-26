@@ -3,6 +3,7 @@ from intelligence_engine import generate_insights
 import pandas as pd
 import json
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -77,16 +78,82 @@ def dashboard():
     # For now, we dynamically find the most stressed zone today.
     peak_zone = max(zones, key=lambda x: x['Visitors']) if zones else None
     
-    peak_ops = {
-        "expected_load": int(total_visitors * 1.5), # Estimate 50% more during peak
-        "critical_zone": peak_zone['Zone_Name'].upper() if peak_zone else "SYSTEM_WAIT",
-        "critical_issue": "SEVERE LOAD",
-        "actions": [
-            f"Pause restocking in {peak_zone['Zone_Name']} immediately.",
-            "Open overflow registers 3 & 4.",
-            f"Re-deploy 1 staff member to {peak_zone['Zone_Name']}."
-        ]
-    }
+    # --- 🕒 DYNAMIC TIME CALCULATOR ---
+    now = datetime.now()
+    current_hour = now.hour
+
+    # Determine the NEXT historical peak based on the current time
+    if current_hour < 13:
+        next_peak_hour = 13
+        peak_time_window = "13:00 - 15:00 (Lunch Rush)"
+    elif current_hour < 18:
+        next_peak_hour = 18
+        peak_time_window = "18:00 - 20:00 (Evening Rush)"
+    else:
+        # If it's past 6 PM, the next peak is tomorrow at 1 PM
+        next_peak_hour = 13
+        peak_time_window = "Tomorrow 13:00 - 15:00"
+
+    # Create exact timestamp for the Javascript countdown
+    target_date = now.replace(hour=next_peak_hour, minute=0, second=0, microsecond=0)
+    if current_hour >= 18:
+        target_date += timedelta(days=1)
+    
+    target_timestamp_ms = int(target_date.timestamp() * 1000)
+
+    # --- 🧠 DYNAMIC PEAK OPERATIONS ENGINE ---
+    # Extract the variables safely so peak_ops can use them
+    if peak_zone:
+        zone_name = peak_zone['Zone_Name'].upper()
+        visitors = int(peak_zone['Visitors'])
+        conv_rate = float(peak_zone['Conversion_Rate'])
+        dwell_time = float(peak_zone['Avg_Dwell_Time'])
+        
+        dynamic_actions = []
+        
+        # TRIGGER 1: Conversion Rate Logic
+        if conv_rate < 5.0:
+            dynamic_actions.append(f"CRITICAL: {zone_name} conversion is only {conv_rate}%. Deploy 'Flash Sale' signs immediately.")
+        elif conv_rate >= 8.0:
+            dynamic_actions.append(f"HIGH CONVERSION ({conv_rate}%). Ensure top-shelf margin items are fully stocked.")
+        else:
+            dynamic_actions.append(f"Stable conversion. Monitor {zone_name} endcaps for visual appeal.")
+
+        # TRIGGER 2: Dwell Time / Staffing Logic
+        if dwell_time > 12.0:
+            dynamic_actions.append(f"Customers are lingering ({dwell_time}m avg). Shift 1 extra staff member to assist and close sales.")
+        else:
+            dynamic_actions.append(f"Fast movement detected. Ensure checkout pathways leading from {zone_name} are totally clear.")
+            
+        # TRIGGER 3: Universal Crowd Control
+        dynamic_actions.append(f"Expected surge to {int(visitors * 1.5)} visitors. Halt all inventory restocking in this zone by 16:30.")
+
+        peak_ops = {
+            "expected_load": int(visitors * 1.5),
+            "critical_zone": zone_name,
+            "critical_issue": "BOTTLENECK RISK" if dwell_time > 12.0 else "SEVERE LOAD",
+            "actions": dynamic_actions,
+            "target_timestamp": target_timestamp_ms, 
+            "peak_time_window": peak_time_window     
+        }
+    else:
+        # Fallback if no zone data exists
+        peak_ops = {
+            "expected_load": 0,
+            "critical_zone": "SYSTEM WAIT",
+            "critical_issue": "NO DATA",
+            "actions": ["> Awaiting tracking data..."],
+            "target_timestamp": target_timestamp_ms,
+            "peak_time_window": peak_time_window
+        }
+
+    return render_template('dashboard.html', 
+                           zones=zones,
+                           total_visitors=total_visitors,
+                           total_revenue=total_revenue,
+                           avg_conversion=avg_conversion,
+                           total_transactions=total_transactions,
+                           peak_ops=peak_ops)
 
     return render_template('dashboard.html', 
                            zones=zones,
