@@ -1,6 +1,22 @@
 /* --- PROJECT HYPER-MOSAIC: LUXE-GLASS EDITION --- */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;400;500;700&family=Outfit:wght@300;400;600;700&family=VT323&display=swap');
 
+/* 1. Default Canvas (Light Mode) */
+html {
+    background-color: #ffffff;
+    /* Pure white or your specific light bg color */
+    transition: background-color 0.3s ease;
+}
+
+/* 2. Dark Mode Canvas */
+/* (This covers the 3 most common ways dark mode is triggered) */
+html[data-bs-theme="dark"],
+html[data-theme="dark"],
+body.dark-mode {
+    background-color: #121212;
+    /* Pure dark or your specific dark bg color */
+}
+
 :root {
     /* --- LUXE-GLASS PALETTE (Dark Default) --- */
     --bg-body: #1a1d21;
@@ -246,4 +262,41 @@ h6 {
 
 .border-gold {
     border-color: var(--accent-gold) !important;
+}
+
+
+/* --- VERCEL SPOTLIGHT GLOW --- */
+.glass-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    /* Crucial: stops the glow from blocking your clicks */
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+            var(--spotlight-color, rgba(255, 255, 255, 0.05)),
+            transparent 80%);
+}
+
+.glass-card:hover::before {
+    opacity: 1;
+}
+
+/* Theme Colors for the Glow */
+html {
+    --spotlight-color: rgba(0, 0, 0, 0.04);
+    /* Subtle dark shadow in Light Mode */
+}
+
+html[data-bs-theme="dark"],
+html[data-theme="dark"],
+body.dark-mode {
+    --spotlight-color: rgba(255, 255, 255, 0.06);
+    /* Ethereal white glow in Dark Mode */
 }
