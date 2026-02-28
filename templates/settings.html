@@ -1,110 +1,235 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <!-- Left Col: General Settings -->
-    <div class="col-md-8">
-        <!-- Appearance -->
-        <div class="glass-card mb-4">
-            <h5 class="text-neon mb-3"><i class="fas fa-paint-brush me-2"></i>Appearance</h5>
-            <div class="d-flex align-items-center justify-content-between">
-                <span class="text-white">Interface Theme</span>
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="theme" id="themeDark" autocomplete="off">
-                    <label class="btn btn-outline-secondary" for="themeDark"><i
-                            class="fas fa-moon me-2"></i>Dark</label>
-
-                    <input type="radio" class="btn-check" name="theme" id="themeLight" autocomplete="off">
-                    <label class="btn btn-outline-secondary" for="themeLight"><i
-                            class="fas fa-sun me-2"></i>Light</label>
-                </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="text-white mb-0"><i class="fas fa-sliders-h text-gold me-2"></i>System Configuration</h4>
+                <small class="text-white-50">Manage your environment, intelligence parameters, and security</small>
             </div>
-        </div>
-
-        <!-- Data & Analytics -->
-        <div class="glass-card mb-4">
-            <h5 class="text-neon mb-3"><i class="fas fa-chart-bar me-2"></i>Data & Analytics</h5>
-            <div class="form-check form-switch mb-3">
-                <input class="form-check-input" type="checkbox" id="insightsToggle" checked>
-                <label class="form-check-label text-white" for="insightsToggle">Enable AI Insights</label>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="kpiToggle" checked>
-                <label class="form-check-label text-white" for="kpiToggle">Show Real-time KPIs</label>
-            </div>
-        </div>
-
-        <!-- Future Controls -->
-        <div class="glass-card mb-4 opacity-50">
-            <h5 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>Account (Disabled)</h5>
-            <input type="text" class="form-control bg-dark text-muted border-secondary mb-2" value="Spectre Admin"
-                disabled>
-            <button class="btn btn-outline-secondary w-100" disabled>Manage Security Keys</button>
-        </div>
-
-        <div class="glass-card mb-4 opacity-50">
-            <h5 class="text-muted mb-3"><i class="fas fa-shield-alt me-2"></i>System Security</h5>
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" disabled>
-                <label class="form-check-label text-muted">Two-Factor Authentication</label>
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Col: Info & Support -->
-    <div class="col-md-4">
-        <!-- App Info -->
-        <div class="glass-card mb-4 text-center">
-            <i class="fas fa-cube fa-3x text-neon mb-3"></i>
-            <h4 class="text-white">MOSAIC</h4>
-            <div class="badge bg-secondary mb-2">Spectre Protocol v1.0.2</div>
-            <hr class="border-secondary">
-            <p class="text-white-50 small">Advanced Retail Intelligence System. Optimized for high-throughput
-                environments.</p>
-        </div>
-
-        <!-- Support -->
-        <div class="glass-card" style="border: 1px solid #ffcc00;">
-            <h5 class="text-warning mb-3"><i class="fas fa-headset me-2"></i>Support</h5>
-            <p class="text-white small mb-3">Encountering critical system failures? Raise a ticket immediately.</p>
-            <a href="mailto:mosaicintl@gmail.com?subject=Mosaic Support Request"
-                class="btn btn-warning w-100 text-dark fw-bold">
-                <i class="fas fa-envelope me-2"></i>Register Complaint
-            </a>
         </div>
     </div>
 </div>
 
+<div class="row g-4">
+    <div class="col-lg-7 d-flex flex-column gap-4">
+
+        <div class="glass-card">
+            <h6 class="text-adaptive mb-4 pb-2 border-bottom-adaptive fw-bold">
+                <i class="fas fa-desktop text-teal me-2"></i>Interface Architecture
+            </h6>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div class="text-adaptive fw-bold mb-1">Hardware Acceleration</div>
+                    <div class="small text-muted">Enable GPU-rendered spatial transitions and 3D tilts.</div>
+                </div>
+                <div class="form-check form-switch custom-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="hardwareToggle" checked>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div class="text-adaptive fw-bold mb-1">Vercel Spotlight Glow</div>
+                    <div class="small text-muted">Dynamic cursor tracking on glass cards.</div>
+                </div>
+                <div class="form-check form-switch custom-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="glowToggle" checked>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-adaptive fw-bold mb-1">Dashboard Data Polling</div>
+                    <div class="small text-muted">API fetch frequency for the Command Center.</div>
+                </div>
+                <select class="form-select form-select-sm glass-select rounded w-auto px-3 py-2">
+                    <option value="realtime">Real-time (WebSockets)</option>
+                    <option value="15s">Every 15 Seconds</option>
+                    <option value="1m" selected>Every 1 Minute</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h6 class="text-adaptive mb-4 pb-2 border-bottom-adaptive fw-bold">
+                <i class="fas fa-brain text-gold me-2"></i>Intelligence Engine Parameters
+            </h6>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-adaptive fw-bold">AI Aggression Level</div>
+                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-2">Balanced</span>
+                </div>
+                <div class="small text-muted mb-3">Determines how quickly the Neural Engine suggests staff redeployment
+                    during peak hours.</div>
+                <input type="range" class="form-range custom-range" min="1" max="3" step="1" id="aiAggression"
+                    value="2">
+                <div class="d-flex justify-content-between text-muted small mt-1 px-1">
+                    <span>Conservative</span>
+                    <span>Balanced</span>
+                    <span>Aggressive</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-adaptive fw-bold mb-1">Automated Execution</div>
+                    <div class="small text-muted">Allow AI to auto-deploy staff without Executive approval.</div>
+                </div>
+                <div class="form-check form-switch custom-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="autoExecuteToggle">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 d-flex flex-column gap-4">
+
+        <div class="glass-card d-flex flex-column">
+            <h6 class="text-adaptive mb-4 pb-2 border-bottom-adaptive fw-bold">
+                <i class="fas fa-shield-alt text-danger me-2"></i>Access & Security
+            </h6>
+
+            <div class="mb-4">
+                <label class="text-adaptive small fw-bold mb-2">Active Environment</label>
+                <div class="p-3 rounded d-flex align-items-center justify-content-between"
+                    style="background: rgba(42, 157, 143, 0.1); border: 1px solid rgba(42, 157, 143, 0.3);">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-server text-teal me-3 fs-4"></i>
+                        <div>
+                            <div class="text-adaptive fw-bold small">Production Cluster</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">us-east-1 (Active)</div>
+                        </div>
+                    </div>
+                    <span class="badge bg-success">Online</span>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="text-adaptive small fw-bold mb-2">API Secret Key (Read-Only)</label>
+                <div class="input-group">
+                    <input type="password" class="form-control glass-select text-muted"
+                        value="msk_live_9f8a7b6c5d4e3f2a1" id="apiKeyInput" readonly>
+                    <button class="btn btn-outline-secondary btn-adaptive" type="button" id="copyApiBtn"
+                        title="Copy to clipboard">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div class="small text-muted mt-2">Use this key to authenticate external POS systems.</div>
+            </div>
+        </div>
+
+        <div class="glass-card text-center d-flex flex-column align-items-center justify-content-center py-5">
+            <i class="fas fa-cube fa-3x text-teal mb-3" style="opacity: 0.8;"></i>
+            <h4 class="text-adaptive fw-bold mb-2" style="letter-spacing: 1px;">MOSAIC</h4>
+            <span
+                class="badge bg-secondary bg-opacity-25 text-adaptive border border-secondary px-3 py-2 mb-3 rounded-pill"
+                style="font-family: monospace;">Spectre Protocol v1.0.2</span>
+            <p class="small text-muted mb-0 px-3">Advanced Retail Intelligence System. Optimized for high-throughput
+                environments.</p>
+        </div>
+
+        <div class="glass-card"
+            style="border-color: rgba(212, 175, 55, 0.4); background: linear-gradient(145deg, var(--glass) 0%, rgba(212, 175, 55, 0.05) 100%);">
+            <h6 class="text-gold mb-3 fw-bold">
+                <i class="fas fa-headset me-2"></i>Support
+            </h6>
+            <p class="small text-adaptive opacity-75 mb-4">Encountering critical system failures? Raise a ticket
+                immediately.</p>
+            <a href="mailto:support@mosaic-protocol.com?subject=System%20Failure%20Report&body=Please%20describe%20the%20issue%20you%20are%20facing:"
+                class="btn w-100 fw-bold d-flex align-items-center justify-content-center gap-2 support-btn text-dark text-decoration-none">
+                <i class="fas fa-envelope"></i> Register Complaint
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* --- CUSTOM PREMIUM TOGGLE SWITCHES --- */
+    .custom-switch .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .custom-switch .form-check-input:checked {
+        background-color: var(--accent-teal);
+        border-color: var(--accent-teal);
+        box-shadow: 0 0 10px rgba(42, 157, 143, 0.4);
+    }
+
+    .custom-switch .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(42, 157, 143, 0.25);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 0.8%29'/%3e%3c/svg%3e");
+    }
+
+    [data-theme="light"] .custom-switch .form-check-input {
+        background-color: rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="light"] .custom-switch .form-check-input:checked {
+        background-color: var(--accent-teal);
+        border-color: var(--accent-teal);
+    }
+
+    /* --- CUSTOM PREMIUM SLIDER --- */
+    .custom-range::-webkit-slider-thumb {
+        background: var(--accent-gold);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        transition: transform 0.1s;
+    }
+
+    .custom-range::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    .custom-range::-webkit-slider-runnable-track {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    [data-theme="light"] .custom-range::-webkit-slider-runnable-track {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- SUPPORT BUTTON SPECIFICS --- */
+    .support-btn {
+        background-color: #ffaa00;
+        transition: all 0.3s ease;
+    }
+
+    .support-btn:hover {
+        background-color: #e69900;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
+    }
+</style>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Sync Radio Buttons with Current Theme
-        const darkRadio = document.getElementById('themeDark');
-        const lightRadio = document.getElementById('themeLight');
-        const currentTheme = document.documentElement.getAttribute('data-theme');
+    // Functional API Copy Button
+    document.getElementById('copyApiBtn').addEventListener('click', function () {
+        const input = document.getElementById('apiKeyInput');
+        input.type = 'text';
+        input.select();
+        document.execCommand('copy');
+        input.type = 'password';
 
-        if (currentTheme === 'light') {
-            lightRadio.checked = true;
-        } else {
-            darkRadio.checked = true;
-        }
+        const icon = this.querySelector('i');
+        icon.classList.replace('fa-copy', 'fa-check');
+        icon.classList.add('text-success');
 
-        // Listeners for manual override from Settings
-        darkRadio.addEventListener('change', () => {
-            if (darkRadio.checked) switchTheme('dark');
-        });
-
-        lightRadio.addEventListener('change', () => {
-            if (lightRadio.checked) switchTheme('light');
-        });
-
-        function switchTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            // Call the global function from base.html to update the header icon
-            if (typeof updateIcon === "function") {
-                updateIcon(theme);
-            }
-        }
+        setTimeout(() => {
+            icon.classList.replace('fa-check', 'fa-copy');
+            icon.classList.remove('text-success');
+        }, 2000);
     });
 </script>
 {% endblock %}
