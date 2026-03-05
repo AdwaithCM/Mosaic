@@ -8,7 +8,8 @@
                 <h4 class="text-white mb-0"><i class="fas fa-chart-pie text-neon me-2"></i>Performance Analytics</h4>
                 <small class="text-white-50">Historical Analysis & Impact Assessment</small>
             </div>
-            <button class="btn btn-sm btn-outline-light"><i class="fas fa-download me-2"></i>Export Report</button>
+            <button id="exportCsvBtn" class="btn btn-sm btn-adaptive"><i class="fas fa-download me-2"></i>Export
+                Report</button>
         </div>
     </div>
 </div>
@@ -215,6 +216,53 @@
     document.addEventListener('themeChanged', (e) => {
         // e.detail contains 'light' or 'dark'
         initCharts(); // Re-render with new theme colors
+    });
+
+
+    // --- CSV EXPORT LOGIC ---
+    document.getElementById('exportCsvBtn').addEventListener('click', function () {
+        // 1. Find our Analytics Table
+        const table = document.querySelector('.mosaic-table');
+        let csvContent = "";
+
+        // 2. Loop through the rows and extract the text
+        const rows = table.querySelectorAll('tr');
+        rows.forEach(row => {
+            let rowData = [];
+            const cols = row.querySelectorAll('td, th');
+
+            cols.forEach(col => {
+                // Clean up the text (removes extra spaces, newlines, and progress bars)
+                let text = col.innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+
+                // If it's the Conversion Rate column, strip out the extra progress bar text
+                if (text.includes('%')) {
+                    text = text.split('%')[0] + '%';
+                }
+
+                // Escape quotes for safe CSV formatting
+                text = text.replace(/"/g, '""');
+                rowData.push(`"${text}"`);
+            });
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        // 3. Generate the file and force download instantly
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        // Create a dynamic filename with today's date
+        const dateObj = new Date();
+        const dateString = dateObj.toISOString().split('T')[0];
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Mosaic_Analytics_Report_${dateString}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 </script>
 

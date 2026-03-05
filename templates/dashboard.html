@@ -11,7 +11,7 @@
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="glass-card position-relative overflow-hidden">
-            <h6 class="text-muted text-uppercase small fw-bold">Total Visitors</h6>
+            <h6 class="text-adaptive text-uppercase small fw-bold">Total Visitors</h6>
             <div class="d-flex justify-content-between align-items-end">
                 <div class="stat-number text-adaptive kinetic-counter">{{ total_visitors }}</div>
                 <div class="text-adaptive" style="width: 80px; height: 40px; opacity: 0.5;">
@@ -27,7 +27,7 @@
 
     <div class="col-md-4">
         <div class="glass-card position-relative overflow-hidden">
-            <h6 class="text-muted text-uppercase small fw-bold">Total Revenue</h6>
+            <h6 class="text-adaptive text-uppercase small fw-bold">Total Revenue</h6>
             <div class="d-flex justify-content-between align-items-end">
                 <div class="stat-number text-gold kinetic-counter">₹{{ total_revenue }}</div>
                 <div style="width: 80px; height: 40px; opacity: 0.8;">
@@ -43,7 +43,7 @@
 
     <div class="col-md-4">
         <div class="glass-card position-relative overflow-hidden">
-            <h6 class="text-muted text-uppercase small fw-bold">Avg Conversion</h6>
+            <h6 class="text-adaptive text-uppercase small fw-bold">Avg Conversion</h6>
             <div class="d-flex justify-content-between align-items-end">
                 <div class="stat-number text-neon kinetic-counter">{{ avg_conversion }}%</div>
                 <div style="width: 80px; height: 40px; opacity: 0.5;">
@@ -387,9 +387,6 @@
             border-right: 1px solid var(--border-color) !important;
         }
     }
-
-
-    
 </style>
 
 <script>
@@ -399,14 +396,48 @@
 
         dateSelector.addEventListener('change', function () {
             const selectedFile = this.value;
-            // Add a quick fade out
-            heatmapImg.style.opacity = '0.4';
 
-            // Swap image and fade back in after short delay
+            // 1. Swap the Heatmap Image smoothly
+            heatmapImg.style.opacity = '0.4';
             setTimeout(() => {
                 heatmapImg.src = "/static/" + selectedFile;
                 heatmapImg.style.opacity = '0.95';
             }, 200);
+
+            // 2. THE UPGRADE: Fetch metrics for the selected day
+            // Extract the date (e.g., '2026-01-24') from 'heatmap_2026-01-24.png'
+            const dateMatch = selectedFile.match(/\d{4}-\d{2}-\d{2}/);
+            if (dateMatch) {
+                const targetDate = dateMatch[0];
+                const counters = document.querySelectorAll('.kinetic-counter');
+
+                // Fade out the old numbers smoothly
+                counters.forEach(c => {
+                    c.style.transition = 'opacity 0.3s ease';
+                    c.style.opacity = '0';
+                });
+
+                // Fetch new data from Python silently
+                fetch(`/api/dashboard/${targetDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        setTimeout(() => {
+                            // Inject new data
+                            counters[0].innerText = data.total_visitors;
+                            counters[1].innerText = '₹' + data.total_revenue;
+                            counters[2].innerText = data.avg_conversion + '%';
+
+                            // Re-trigger our beautiful spinning animation
+                            if (typeof initKineticCounters === 'function') {
+                                initKineticCounters();
+                            }
+
+                            // Fade the new numbers back in
+                            counters.forEach(c => c.style.opacity = '1');
+                        }, 300); // Wait for fade out to finish
+                    })
+                    .catch(err => console.error("Error fetching historical data:", err));
+            }
         });
     });
 

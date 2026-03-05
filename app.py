@@ -148,6 +148,7 @@ def dashboard():
         }
 
     return render_template('dashboard.html', 
+                           page='dashboard',
                            zones=zones,
                            total_visitors=total_visitors,
                            total_revenue=total_revenue,
@@ -155,54 +156,96 @@ def dashboard():
                            total_transactions=total_transactions,
                            peak_ops=peak_ops)
 
-    return render_template('dashboard.html', 
-                           zones=zones,
-                           total_visitors=total_visitors,
-                           total_revenue=total_revenue,
-                           avg_conversion=avg_conversion,
-                           total_transactions=total_transactions,
-                           peak_ops=peak_ops) # Inject the new intelligence!
+    
 
 @app.route('/analytics')
 def analytics():
-    # Load the real current data for the Bar Charts
-    current_data = load_analytics()
-    zone_names = [item['Zone_Name'] for item in current_data]
-    zone_conversions = [item['Conversion_Rate'] for item in current_data]
-    
-    # --- LOAD REAL HISTORICAL DATA FOR THE LINE CHART ---
+    # --- AGGREGATE REAL HISTORICAL DATA FOR ALL 6 DAYS ---
     history_dates = []
     history_revenue = []
+    all_data = []
     
     if os.path.exists(HISTORICAL_FILE):
         try:
             df_hist = pd.read_csv(HISTORICAL_FILE)
-            # Group by Date and sum the Revenue across all zones for that day
-            daily_revenue = df_hist.groupby('Date')['Revenue'].sum().reset_index()
             
-            # Convert to lists for Chart.js
+            # 1. Line Chart Data (Group by Date)
+            daily_revenue = df_hist.groupby('Date')['Revenue'].sum().reset_index()
             history_dates = daily_revenue['Date'].tolist()
             history_revenue = daily_revenue['Revenue'].tolist()
+            
+            # 2. THE UPGRADE: 6-Day Data for Bar Chart & Table (Group by Zone)
+            # We SUM the volume (Visitors/Revenue) and AVERAGE the performance (Conversion/Dwell)
+            if 'Zone_Name' in df_hist.columns:
+                agg_df = df_hist.groupby('Zone_Name').agg({
+                    'Visitors': 'sum',
+                    'Revenue': 'sum',
+                    'Conversion_Rate': 'mean',
+                    'Avg_Dwell_Time': 'mean'
+                }).reset_index()
+                
+                # Round decimals for a clean UI
+                agg_df['Conversion_Rate'] = agg_df['Conversion_Rate'].round(1)
+                agg_df['Avg_Dwell_Time'] = agg_df['Avg_Dwell_Time'].round(0).astype(int)
+                
+                all_data = agg_df.to_dict('records')
         except Exception as e:
-            print(f"❌ Error loading historical data: {e}")
-    else:
-        print(f"⚠️ Warning: {HISTORICAL_FILE} not found. Charts will be empty.")
+            print(f"❌ Error processing historical data: {e}")
+            
+    # Fallback to today's live data if historical fails
+    if not all_data:
+        all_data = load_analytics()
+
+    zone_names = [item['Zone_Name'] for item in all_data]
+    zone_conversions = [item['Conversion_Rate'] for item in all_data]
 
     return render_template('analytics.html', 
-                           analytics_data=current_data,
+                           page='analytics',
+                           analytics_data=all_data,
                            dates=json.dumps(history_dates),
                            revenues=json.dumps(history_revenue),
                            zone_names=json.dumps(zone_names),
                            conversions=json.dumps(zone_conversions))
 
+
+# --- NEW ROUTE: SILENT API FOR DASHBOARD HEATMAP ---
+@app.route('/api/dashboard/<date>')
+def api_dashboard_data(date):
+    """Fetches exact metrics for the day selected in the Dashboard dropdown."""
+    try:
+        if os.path.exists(HISTORICAL_FILE):
+            df = pd.read_csv(HISTORICAL_FILE)
+            if 'Date' in df.columns:
+                day_data = df[df['Date'] == date]
+                if not day_data.empty:
+                    zones = day_data.to_dict('records')
+                    return jsonify({
+                        'total_visitors': int(sum(z['Visitors'] for z in zones)),
+                        'total_revenue': int(sum(z['Revenue'] for z in zones)),
+                        'avg_conversion': round(sum(z['Conversion_Rate'] for z in zones) / len(zones), 1)
+                    })
+        
+        # Fallback to today's live data if the exact date isn't found
+        zones = get_latest_zone_data()
+        return jsonify({
+            'total_visitors': int(sum(z['Visitors'] for z in zones)),
+            'total_revenue': int(sum(z['Revenue'] for z in zones)),
+            'avg_conversion': round(sum(z['Conversion_Rate'] for z in zones) / len(zones), 1) if zones else 0
+        })
+    except Exception as e:
+        print(f"API Error: {e}")
+        return jsonify({'total_visitors': 0, 'total_revenue': 0, 'avg_conversion': 0})
+
+
+
 @app.route('/ai')
 def ai_reports():
     strategies = load_strategies()
-    return render_template('ai.html', strategies=strategies)
+    return render_template('ai.html',page='ai', strategies=strategies)
 
 @app.route('/settings')
 def settings():
-    return render_template('settings.html')
+    return render_template('settings.html',page='settings')
     
 # --- NEW ROUTE: TRIGGERS THE AI MANUALLY ---
 @app.route('/run_intelligence', methods=['POST'])
